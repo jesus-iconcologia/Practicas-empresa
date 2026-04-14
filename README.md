@@ -2,17 +2,6 @@
 
 Aplicacion web de gestion de muestras desarrollada con Django y MySQL.
 
-## Documentacion incluida
-
-- `DOCUMENTACION_FUNCIONAL_GESLAB.md`: explicacion del sistema en lenguaje no tecnico.
-- `REVISION_TECNICA_GESLAB.md`: revision del codigo, riesgos detectados y recomendaciones.
-
-## Ejecucion en local con Docker
-
-```bash
-docker compose up --build
-```
-
 ## Configuracion local recomendada
 
 - Usa `.env` solo para tu entorno local y toma `.env.example` como plantilla para nuevas instalaciones.
