@@ -1,0 +1,131 @@
+{% extends "master.html" %}
+
+{% block title %}
+Agenda
+{% endblock %}
+{% load static %}
+{% block content %}
+<link rel ="stylesheet" href="{% static 'css/muestras_todas.css' %}">
+<style>
+  button[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+</style>
+    <!-- BARRA DE ACCIONES -->
+    <div class="acciones-estudios">
+        <a href="/muestras" class="accion-btn accion-secundaria">
+            ⬅ Volver a muestras
+        </a>
+
+        <a href="/muestras/nuevo_centro" class="accion-btn accion-primaria">
+            ➕ Añadir centro de envío
+        </a>
+    </div>
+
+    <!-- CABECERA -->
+    <div class="form-header">
+        <h1>📦 Agenda de centros de envío</h1>
+        <p class="form-subtitle">
+            Gestión de centros, contactos y envíos de muestras.
+        </p>
+    </div>
+
+    <!-- FORMULARIO + TABLA -->
+    <form action="{% url 'eliminar_centro' %}" method="post">
+        {% csrf_token %}
+
+        <!-- ACCIONES SOBRE SELECCIÓN -->
+        <div class="form-actions" style="margin-bottom: 15px;">
+            <button type="submit"
+                    class="accion-btn accion-peligro"
+                    id="btn-eliminar-centros"
+                    name="eliminar"
+                    disabled>
+                🗑 Eliminar centros seleccionados
+            </button>
+        </div>
+
+        <!-- TABLA -->
+        <div class="table-container">
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Centro</th>
+                        <th>Lugar</th>
+                        <th>Dirección</th>
+                        <th>Contacto</th>
+                        <th>Teléfono</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for contacto in agenda %}
+                    <tr>
+                        <td style="display: flex; justify-content: space-around;">
+                            <input type="checkbox"
+                                   name="ids_centro"
+                                   value="{{ contacto.id }}"
+                                   onchange="actualizarBotonEliminar()">
+                            <a href="agenda/editar/{{ contacto.id }}"
+                               class="chip-detalle" title="Editar"
+                               style="padding: 2px 5px;">✏️</a>
+                            <a href="agenda/{{ contacto.id }}/envio"
+                               class="chip-detalle" title="Enviar"
+                               style="padding: 2px 5px;">📤</a>
+                        </td>
+
+                        <td>{{ contacto.centro }}</td>
+                        <td>{{ contacto.lugar }}</td>
+                        <td class="wrap-text">{{ contacto.direccion }}</td>
+                        <td>{{ contacto.persona_contacto }}</td>
+                        <td>{{ contacto.telefono_contacto }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+
+<script>
+function actualizarBotonEliminar() {
+    const checkboxes = document.querySelectorAll('input[name="ids_centro"]');
+    const btn = document.getElementById('btn-eliminar-centros');
+    const haySeleccionados = Array.from(checkboxes).some(cb => cb.checked);
+    if (haySeleccionados) {
+        btn.removeAttribute('disabled');
+    } else {
+        btn.setAttribute('disabled', 'disabled');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('form[action*="eliminar_centro"]');
+    const boton = document.getElementById('btn-eliminar-centros');
+    if (!form || !boton) {
+        return;
+    }
+
+    form.addEventListener('submit', async function (event) {
+        if (boton.disabled) {
+            event.preventDefault();
+            return;
+        }
+
+        event.preventDefault();
+        const confirmado = await confirmarAccionApp({
+            title: 'Eliminar centros',
+            message: '¿Quieres eliminar los centros seleccionados?',
+            confirmText: 'Eliminar'
+        });
+
+        if (confirmado) {
+            form.submit();
+        }
+    });
+});
+</script>
+
+{% endblock %}

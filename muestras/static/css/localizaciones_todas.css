@@ -1,0 +1,400 @@
+/* ===== CONTENEDOR GENERAL ===== */
+#archivo {
+    margin-top: 20px;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* ===== LISTA JERÁRQUICA ===== */
+#archivo ul {
+    list-style: none;
+    padding-left: 18px;
+    margin: 0;
+}
+
+/* ===== LÍNEA VERTICAL (ESTILO EXPLORADOR) ===== */
+#archivo ul ul {
+    border-left: 2px solid #e2e7f0;
+    margin-left: 12px;
+    padding-left: 18px;
+}
+
+/* ===== ELEMENTO DE NIVEL ===== */
+#archivo li {
+    margin: 6px 0;
+    padding: 6px 6px;
+    border-radius: 8px;
+    transition: background .2s;
+}
+
+#archivo li:hover {
+    background-color: #f3f7ff;
+}
+
+/* ===== BOTONES COLAPSABLES ===== */
+.dropbtn {
+    background-color: rgba(26, 61, 124, 0.06);
+    border: 1px solid #dfe3e6;
+    padding: 6px 10px;
+    border-radius: 6px;
+
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a3d7c;
+    
+    cursor: pointer;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    transition: all .2s ease;
+}
+
+.dropbtn:hover {
+    background-color: #e8f0fe;
+    border-color: #b9c6d3;
+}
+
+/* ===== CHECKBOXES ===== */
+#archivo input[type="checkbox"] {
+    transform: scale(1.15);
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+/* ===== ICONOS DE CADA NIVEL ===== */
+.congeladores > li > .dropbtn::before { content: "🧊"; }
+.estantes > li > .dropbtn::before { content: "🪜"; }
+.posicion_estante > li > .dropbtn::before { content: "📌"; }
+.racks > li > .dropbtn::before { content: "🗂"; }
+.bandejas > li > .dropbtn::before { content: "🧱"; }
+.posicion_caja_rack > li > .dropbtn::before { content: "📍"; }
+.cajas > li > .dropbtn::before { content: "📦"; }
+
+/* ===== LINKS A DETALLES DE MUESTRA ===== */
+#archivo a {
+    color: #1a3d7c;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+#archivo a:hover {
+    text-decoration: underline;
+    color: #163366;
+}
+
+/* ===== CHIP DE CANTIDAD ===== */
+.chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: #e8f0fe;
+    color: #1a3d7c;
+
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: 600;
+
+    border-radius: 12px;
+    margin-left: 6px;
+}
+
+.badge {
+    padding: 2px 6px;
+    font-size: 11px;
+    border-radius: 6px;
+    margin-left: 6px;
+    font-weight: 600;
+    color: white;
+}
+
+/* Color base: gris azulado */
+.estado-icono {
+    font-size: 16px;
+    margin-right: 4px;
+}
+
+/* Disponible → verde clínico */
+.icono-disponible {
+    color: #4caf50;
+}
+
+
+/* Parcialmente enviada → naranja suave */
+.icono-parcial {
+    color: #ffa000;
+}
+
+
+/* ==== BARRA DE ACCIONES === */
+.acciones-archivo {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+/* Botón base (legacy) */
+.accion-btn {
+    padding: 8px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    border: none;
+}
+
+/* ===== PANELES COLAPSABLES (igual que muestras) ===== */
+.collapsible {
+    margin: 20px 0;
+    border-radius: 10px 10px 0 0;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.collapsible-header {
+    width: 100%;
+    padding: 12px 16px;
+    background-color: #1a3d7c;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: left;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s ease;
+}
+
+.collapsible-header:hover {
+    background-color: #163366;
+}
+
+.collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, padding 0.25s ease;
+    padding: 0 16px;
+}
+
+.collapsible-content.open {
+    padding: 16px;
+}
+
+.collapsible-header::after {
+    content: "▼";
+    transition: transform 0.3s;
+}
+
+.collapsible-header.active::after {
+    transform: rotate(-180deg);
+}
+
+/* ===== PANEL DE FILTROS ===== */
+.filter-panel {
+    padding: 14px 0 6px;
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 18px 22px;
+    margin-bottom: 14px;
+}
+
+.filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-field label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a3d7c;
+    line-height: 1.25;
+}
+
+.filter-field input[type="text"],
+.filter-field input[type="date"],
+.filter-field select {
+    width: 100%;
+    height: 40px;
+    padding: 8px 12px;
+    border: 1px solid #cfd8e3;
+    border-radius: 6px;
+    font-size: 14px;
+    box-sizing: border-box;
+    background: #fff;
+}
+
+.filter-field select:disabled {
+    background-color: #f0f0f0;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.filter-row {
+    grid-column: 1 / -1;
+    border-top: 1px solid #eee;
+    margin: 4px 0;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.filter-buttons .btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.filter-buttons .btn-primary {
+    background-color: #1a3d7c;
+    color: white;
+}
+
+.filter-buttons .btn-primary:hover {
+    background-color: #163366;
+}
+
+.filter-buttons .btn-secondary {
+    background-color: #e8f0fe;
+    color: #1a3d7c;
+}
+
+.filter-buttons .btn-secondary:hover {
+    background-color: #d6e3ff;
+}
+
+/* ===== PANEL DE BOTONES (igual que muestras) ===== */
+.action-buttons {
+    background-color: #ffffff;
+    padding: 18px 20px;
+    margin: 0;
+    border-radius: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 18px;
+    align-items: center;
+}
+
+.action-buttons .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    line-height: 38px;
+    padding: 0 16px;
+    gap: 8px;
+    background-color: #1a3d7c;
+    color: white;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s ease;
+}
+
+.action-buttons .btn:hover {
+    background-color: #163366;
+}
+
+.action-buttons .btn-secondary {
+    background-color: transparent;
+    color: #333;
+    border: none;
+}
+
+.action-buttons .btn-secondary:hover {
+    background-color: #f0f0f0;
+}
+
+.action-buttons .btn-danger {
+    background-color: #d9534f;
+}
+
+.action-buttons .btn-danger:hover {
+    background-color: #c0392b;
+}
+
+.action-buttons .btn-success {
+    background-color: #4caf50;
+}
+
+.action-buttons .btn-success:hover {
+    background-color: #3e8e41;
+}
+
+.action-buttons .btn-success:disabled,
+.action-buttons .btn-danger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* ==== FILA DE ACCIONES ==== */
+.action-row {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* ==== CHIP DETALLES ==== */
+.chip-detalle {
+    padding: 4px 10px;
+    font-size: 12px;
+    background: #e8f0fe;
+    color: #1a3d7c;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    border: 1px solid #dfe3e6;
+    transition: 0.2s;
+}
+
+.chip-detalle:hover {
+    background: #d7e4ff;
+}
+
+/* ==== SPINNER INLINE PARA CARGA AJAX ==== */
+.spinner-sm {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #ddd;
+    border-top-color: #1a3d7c;
+    border-radius: 50%;
+    animation: spin-sm 0.6s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+}
+@keyframes spin-sm { to { transform: rotate(360deg); } }

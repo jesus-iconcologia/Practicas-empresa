@@ -1,0 +1,73 @@
+{% extends "master.html" %}
+{% load static %}
+{% load muestras_filters %}
+
+{% block title %}
+Historial de envios
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/muestras_todas.css' %}">
+<div class="form-container">
+    <div class="acciones-estudios">
+        <a href="/muestras" class="accion-btn accion-secundaria">Volver a muestras</a>
+    </div>
+
+    <div class="form-header">
+        <h1>Historial de envios</h1>
+        <p class="form-subtitle">Muestra: <strong>{{ muestra.nom_lab }}</strong></p>
+    </div>
+
+    <div class="form-card">
+        <h2>Resumen de la muestra</h2>
+        <div class="detalle-grid">
+            <p><strong>Llegada al laboratorio:</strong> {{ muestra.fecha_llegada|default:"&mdash;" }}</p>
+            <p><strong>Centro de procedencia:</strong> {{ muestra.centro_procedencia|default:"&mdash;" }}</p>
+            <p><strong>Volumen original:</strong> {{ volumen_original }} {{ muestra.unidad_volumen }}</p>
+            {% if muestra.estado_actual == "PENV" %}
+            <p><strong>Volumen restante:</strong> {{ volumen_restante }} {{ muestra.unidad_volumen }}</p>
+            {% endif %}
+            <p>
+                <strong>Estado actual:</strong>
+                <span class="estado-chip estado-{{ muestra.estado_actual|estado_badge_class }}">
+                    {{ muestra.estado_actual|estado_label }}
+                </span>
+            </p>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <h2>Historial de envios</h2>
+        <div class="table-container">
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Fecha de envio</th>
+                        <th>Centro destino</th>
+                        <th>Lugar destino</th>
+                        <th>Volumen enviado</th>
+                        <th>Concentracion enviada</th>
+                        <th>Usuario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for envio in envios %}
+                    <tr>
+                        <td data-sort="{{ envio.fecha_envio|date:'Y-m-d'|default:'' }}">{{ envio.fecha_envio }}</td>
+                        <td>{{ envio.centro_destino }}</td>
+                        <td>{{ envio.lugar_destino }}</td>
+                        <td>{{ envio.volumen_enviado }} {{ envio.unidad_volumen_enviado }}</td>
+                        <td>{{ envio.concentracion_enviada }} {{ envio.unidad_concentracion_enviada }}</td>
+                        <td>{{ envio.usuario_envio.username }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" style="text-align:center;">No existen envios registrados para esta muestra.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

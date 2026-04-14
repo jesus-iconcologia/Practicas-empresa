@@ -1,0 +1,18 @@
+-- ============================================================================
+-- Inicializacion minima de MySQL para GesLab
+-- ----------------------------------------------------------------------------
+-- Este archivo se deja intencionadamente sin sentencias de creacion de tablas.
+--
+-- Motivo:
+-- - El esquema de la aplicacion se crea y actualiza con las migraciones Django.
+-- - El dump anterior mezclaba estructura, datos y texto con codificacion rota.
+-- - Mantener un volcado completo aqui era fragil y se desactualizaba con
+--   facilidad respecto al codigo real del proyecto.
+--
+-- Flujo actual recomendado:
+-- 1. MySQL crea una base vacia usando las variables del contenedor.
+-- 2. Django ejecuta `python manage.py migrate`.
+-- 3. Django ejecuta `python manage.py bootstrap_initial_data`.
+-- 4. Django asegura el superusuario si esta configurado por entorno.
+--
+-- ============================================================================

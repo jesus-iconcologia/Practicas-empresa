@@ -1,0 +1,383 @@
+/* ===========================================
+   ESTILO CLÍNICO PARA LA PÁGINA DE MUESTRAS
+   =========================================== */
+
+/* --------------- CONTENIDO GENERAL --------------- */
+
+
+/* Contenedor general para centrar contenido */
+.page-content {
+    background-color: #ffffff;
+    padding: 20px 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    margin-top: 20px;
+    max-width: 1650px;
+}
+.page-container{
+    padding:10px;
+}
+
+/* Panel de filtros alineado con Estudios/Congeladores */
+.filter-panel {
+    background-color: transparent;
+    padding: 14px 0 6px;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+/* Contenedor flexible */
+.filter-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px 28px;  /* espacio horizontal y vertical */
+}
+
+/* Cada campo */
+.filter-field {
+    display: flex;
+    flex-direction: column;
+    min-width: 180px;
+    gap: 8px;
+}
+
+.filter-field label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a3d7c;
+    line-height: 1.25;
+}
+
+/* Inputs */
+.filter-field input,
+.filter-field select {
+    width: 100%;
+    height: 40px;
+    padding: 8px 12px;
+    border: 1px solid #cfd8e3;
+    border-radius: 6px;
+    font-size: 14px;
+    box-sizing: border-box;
+    background: #fff;
+}
+
+/* Elemento para forzar salto de línea dentro de .filter-grid (ocupa toda la fila) */
+.filter-row {
+    width: 100%;
+    height: 0; /* sin alto visible; puede usarse para separar visualmente con hr si se desea */
+}
+.filter-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 12px; /* espacio entre botones */
+    margin-top: 18px;
+    align-items: center; /* los alinea verticalmente */
+}
+
+.filter-buttons .btn {
+    align-items: center;
+    height: 38px;
+    display: inline-flex;
+    gap: 10px;
+    background-color: #1a3d7c;
+    color: white;
+    padding: 7px 12px;
+    margin-right: 10px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 13px;
+    line-height: 38px;  /* <-- esto es clave */
+    padding: 0 16px; /* controla solo los lados */
+    transition: background 0.2s ease;
+}
+
+.filter-buttons .btn:hover {
+    background-color: #163366;
+}
+
+.filter-buttons button {
+    padding: 0 16px;
+    background-color: inherit;
+    border: none;
+}
+
+
+/* ===== PANEL DE BOTONES PROFESIONAL ===== */
+
+.action-buttons {
+    background-color: #ffffff;
+    padding: 18px 20px;
+    margin: 0;
+    border-radius: 12px;
+    box-shadow: none;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 18px;      /* espacio entre botones */
+    align-items: center;
+}
+
+/* Estilo general de botones del panel */
+.action-buttons .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 38px;
+    line-height: 38px;
+    padding: 0 16px;
+    gap: 8px;
+
+    background-color: #1a3d7c;
+    color: white;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    transition: background 0.2s ease;
+}
+
+/* Hover profesional */
+.action-buttons .btn:hover {
+    background-color: #163366;
+}
+
+/* Botón secundario */
+.action-buttons .btn-secondary {
+    background-color: #e8f0fe;
+    color: #1a3d7c;
+}
+
+.action-buttons .btn-secondary:hover {
+    background-color: #d6e3ff;
+}
+
+/* Botón de peligro (eliminar / destruir) */
+.action-buttons .btn-danger {
+    background-color: #d9534f;
+}
+
+.action-buttons .btn-danger:hover {
+    background-color: #c0392b;
+}
+
+/* Botón éxito (exportar excel, registrar envío) */
+.action-buttons .btn-success {
+    background-color: #4caf50;
+}
+
+.action-buttons .btn-success:hover {
+    background-color: #3e8e41;
+}
+
+/* Para inputs que actúan como botones */
+.action-buttons input[type="button"],
+.action-buttons input[type="submit"] {
+    all: unset;              /* elimina estilos del navegador */
+    cursor: pointer;
+}
+
+/* CONTENEDOR GENERAL DEL PANEL */
+.collapsible {
+    margin: 20px 0;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+/* CABECERA DEL PANEL */
+.collapsible-header {
+    width: 100%;
+    padding: 12px 16px;
+    background-color: #1a3d7c;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: left;
+    font-weight: 600;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    transition: background 0.2s ease;
+}
+
+.collapsible-header:hover {
+    background-color: #163366;
+}
+
+/* CONTENIDO DEL PANEL (COLAPSADO POR DEFECTO) */
+.collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, padding 0.25s ease;
+    padding: 0 16px;
+}
+
+/* CONTENIDO ABIERTO */
+.collapsible-content.open {
+    padding: 16px;
+}
+
+/* ICONO GIRATORIO */
+.collapsible-header::after {
+    content: "▼";
+    transition: transform 0.3s;
+}
+
+.collapsible-header.active::after {
+    transform: rotate(-180deg);
+}
+
+
+/* ------------------------------------------
+   TABLA CON SCROLL HORIZONTAL
+------------------------------------------- */
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;      /* scroll horizontal si es necesario */
+    max-height: 80vh;      /* scroll vertical si hay muchas filas */
+    overflow-y: scroll;    /* siempre mostrar scroll vertical */
+}
+
+.table-container::-webkit-scrollbar {
+    width: 14px; /* ancho del scrollbar */
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: #1a3d7c;
+    border-radius: 7px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: #163366;
+}
+
+.table-container table{
+    width:100%;
+}
+
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px; /* clave: hacer que quepan 22 columnas */
+    table-layout: auto;
+    white-space: nowrap; /* no romper texto */
+}
+.wrap-text {
+    white-space: normal !important;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+
+/* Cabecera */
+.styled-table thead tr {
+    background-color: #1a3d7c;
+    color: white;
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 3px 6px;  /* padding reducido para que todo quepa */
+    border-bottom: 1px solid #dfe3e6;
+    text-align: left;
+}
+
+/* Hover */
+.styled-table tbody tr:hover {
+    background-color: #e8f0fe !important;
+}
+
+/* ------------------------------------------
+   COLORES POR ESTADO
+------------------------------------------- */
+
+.status-available { background-color: #d4edda; }
+.status-processing { background-color: #fff3cd; }
+.status-destroyed { background-color: #f8d7da; }
+.status-enviada { background-color: #dbe9ff; }
+
+/* ------------------------------------------
+   INPUTS Y LINKS DENTRO DE LA TABLA
+------------------------------------------- */
+
+.styled-table input[type="checkbox"] {
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+.styled-table a {
+    color: #1a3d7c;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.styled-table a:hover {
+    text-decoration: underline;
+}
+
+/* Inputs con unidad inline */
+.inline-input {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.inline-input input {
+    width: 90px;
+    padding: 6px 8px;
+    font-size: 13px;
+}
+
+.inline-input span {
+    font-size: 13px;
+    color: #555;
+}
+
+.detalle-grid {
+    display: grid;
+    grid-template-columns: max-content max-content;
+    column-gap: 40px;
+    row-gap: 6px;
+}
+
+/* Table header arrows via CSS pseudo-element */
+.styled-table th {
+    position: relative;
+    padding-right: 22px; /* space for the pseudo arrow */
+}
+
+.sorting::after {
+    content: "↕";
+    position: absolute;
+    right: 6px;
+    opacity: 0.4;
+    font-size: 12px;
+}
+
+.sorting_asc::after {
+    content: "↑";
+    opacity: 1;
+}
+
+.sorting_desc::after {
+    content: "↓";
+    opacity: 1;
+}
+

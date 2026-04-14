@@ -1,0 +1,74 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}
+Crear posiciones
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+<style>
+  .choice-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+  }
+
+  .choice-card {
+    border: 1px solid #d9e3ef;
+    border-radius: 14px;
+    padding: 22px;
+    background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+    box-shadow: 0 8px 20px rgba(23, 58, 99, 0.06);
+  }
+
+  .choice-card h2 {
+    margin-top: 0;
+    color: #173a63;
+  }
+
+  .choice-card p {
+    color: #52667c;
+    line-height: 1.5;
+  }
+
+  .choice-card .accion-btn {
+    margin-top: 12px;
+  }
+</style>
+
+<div class="form-container">
+  <div class="acciones-estudios">
+    <a href="{% url 'detalles_congelador' congelador.congelador %}" class="accion-btn accion-secundaria">Volver a gestionar</a>
+  </div>
+
+  <div class="form-header">
+    <h1>Crear posiciones</h1>
+    <p class="form-subtitle">Recurso: {{ congelador.congelador }}. Elija cómo desea crear las posiciones.</p>
+  </div>
+
+  <div class="form-card info-card">
+    <h2>Resumen del recurso</h2>
+    <p><strong>Estructura:</strong> {{ estructura_label }}</p>
+    {% if simple_structure %}
+      <p>Este recurso se creará siguiendo la jerarquía: <strong>recurso → estante → posición del cajón → caja → fila → columna</strong>.</p>
+    {% else %}
+      <p>Este recurso se creará siguiendo la jerarquía completa de rack, bandeja, caja, fila y columna.</p>
+    {% endif %}
+  </div>
+
+  <div class="choice-grid">
+    <section class="choice-card">
+      <h2>📝 Mediante formulario</h2>
+      <p>Introduzca manualmente una posición cada vez. El formulario se adapta automáticamente al tipo de recurso.</p>
+      <a href="{% url 'crear_localizacion_manual' congelador.congelador %}" class="accion-btn accion-primaria">Abrir formulario</a>
+    </section>
+
+    <section class="choice-card">
+      <h2>📥 Mediante plantilla Excel</h2>
+      <p>Descargue la plantilla adaptada al recurso y cargue después el fichero Excel con todas las posiciones.</p>
+      <a href="{% url 'upload_excel_localizaciones' %}?congelador_id={{ congelador.id }}" class="accion-btn accion-secundaria">Usar plantilla Excel</a>
+    </section>
+  </div>
+</div>
+{% endblock %}

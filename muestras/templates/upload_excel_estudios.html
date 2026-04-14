@@ -1,0 +1,254 @@
+{% extends "master.html" %}
+
+{% block title %}
+Importar archivo Excel
+{% endblock %}
+{% load static %}
+{% block content %}
+<!-- Formulario para subir un archivo Excel con datos de estudios -->
+ 
+<link rel ="stylesheet" href="{% static 'css/forms.css' %}">
+
+<div class="form-container">
+
+    <!-- CABECERA -->
+    <div class="form-header">
+        <h1>📤 Importar estudios por Excel</h1>
+        <p class="form-subtitle">
+            Cree múltiples estudios utilizando una plantilla Excel.
+        </p>
+    </div>
+
+    {% if error %}
+        <div class="form-card error-card" style="border-left: 4px solid #dc3545; background-color: #f8d7da;">
+            <p style="color: #721c24; margin: 0;">{{ error }}</p>
+        </div>
+    {% endif %}
+
+    <!-- MENSAJES DEL SISTEMA -->
+    {% if messages %}
+    <div class="form-card messages-card">
+        {% for message in messages %}
+            <p class="message-item {{ message.tags }}">{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- TARJETA INFORMATIVA -->
+    <div class="form-card info-card">
+        <h2>ℹ️ Instrucciones</h2>
+
+        <p>
+            Utilice exclusivamente la siguiente plantilla Excel.
+            En ella, las columnas obligatorias están marcadas en
+            <strong style="color:#d32f2f;">rojo</strong>.
+        </p>
+
+        <p>
+            Si alguna de estas columnas obligatorias no se rellena,
+            el estudio correspondiente <strong>no se añadirá</strong>
+            a la base de datos.
+        </p>
+    </div>
+
+    <!-- DESCARGA DE PLANTILLA -->
+    <div class="form-card">
+        <h2>⬇️ Descargar plantilla</h2>
+
+        <a href="{% url 'descargar_plantilla_muestras' macro=3 %}"
+           download="plantilla_estudios.xlsx"
+           class="accion-btn accion-secundaria">
+            📥 Descargar plantilla de estudios
+        </a>
+    </div>
+
+    <!-- FORMULARIO DE SUBIDA -->
+    <form method="post" enctype="multipart/form-data" class="styled-form">
+        {% csrf_token %}
+
+        <div class="form-card">
+            <h2>📤 Importar archivo Excel</h2>
+
+            {% for field in form %}
+                <div class="form-field">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                        {% if field.field.required %}
+                            <span class="required">*</span>
+                        {% endif %}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+
+                    {% if field.errors %}
+                        <div class="error-text">
+                            {{ field.errors|striptags }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <small class="error-text" style="display: block; color: #dc3545; margin-top: 5px;">Este campo es obligatorio.</small>
+        </div>
+
+        <!-- ACCIONES -->
+            <div class="form-actions">
+            <button name="upload_excel"
+                    id="upload-button"
+                    type="submit"
+                    class="accion-btn accion-primaria"
+                    disabled>
+                ⬆️ Importar Excel
+            </button>
+
+            <a href="/estudios" class="accion-btn accion-secundaria">
+                ↩ Volver a estudios
+            </a>
+        </div>
+    </form>
+
+</div>
+
+<!-- ===================== OVERLAY DE PROGRESO ===================== -->
+<style>
+  #progreso-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 99999;
+    animation: progresoFadeIn 0.3s ease;
+  }
+  @keyframes progresoFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes progresoSlideUp { from { opacity: 0; transform: translateY(30px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  .progreso-popup {
+    background: white; border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    padding: 36px 34px 30px; text-align: center;
+    max-width: 440px; width: 90%;
+    animation: progresoSlideUp 0.35s ease;
+  }
+  .progreso-popup h2 { color: #1a1a2e; margin-bottom: 22px; font-size: 18px; font-weight: 600; }
+  .progreso-bar-wrapper { background: #e9ecef; border-radius: 8px; height: 26px; overflow: hidden; margin-bottom: 10px; }
+  .progreso-bar {
+    background: linear-gradient(90deg, #4361ee, #3a0ca3); height: 100%; border-radius: 8px;
+    transition: width 0.3s ease; width: 0%;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 12px; font-weight: 700; min-width: 40px;
+  }
+  .progreso-bar.done { background: linear-gradient(90deg, #2dc653, #1b9e3e); }
+  .progreso-bar.error { background: linear-gradient(90deg, #e63946, #c1121f); }
+  .progreso-info { color: #555; font-size: 14px; margin-top: 10px; }
+  .progreso-counter { color: #888; font-size: 12px; margin-top: 5px; }
+  .progreso-spinner {
+    display: inline-block; width: 16px; height: 16px;
+    border: 2.5px solid #ddd; border-top-color: #4361ee; border-radius: 50%;
+    animation: progresoSpin 0.7s linear infinite; vertical-align: middle; margin-right: 6px;
+  }
+  @keyframes progresoSpin { to { transform: rotate(360deg); } }
+</style>
+
+<script>
+function mostrarProgreso(texto) {
+    const prev = document.getElementById('progreso-overlay');
+    if (prev) prev.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'progreso-overlay';
+    overlay.innerHTML = `
+      <div class="progreso-popup">
+        <h2>${texto}</h2>
+        <div class="progreso-bar-wrapper">
+          <div class="progreso-bar" id="progreso-bar"></div>
+        </div>
+        <p class="progreso-info" id="progreso-txt"><span class="progreso-spinner"></span>Procesando...</p>
+        <p class="progreso-counter" id="progreso-cnt"></p>
+      </div>`;
+    document.body.appendChild(overlay);
+}
+function _actualizarBarraProgreso(current, total) {
+    const bar = document.getElementById('progreso-bar');
+    const txt = document.getElementById('progreso-txt');
+    const cnt = document.getElementById('progreso-cnt');
+    if (!bar) return;
+    const pct = total > 0 ? (current / total * 100) : 0;
+    bar.style.width = pct.toFixed(1) + '%';
+    bar.textContent = Math.round(pct) + '%';
+    if (txt) txt.innerHTML = '<span class="progreso-spinner"></span>Procesando registro ' + current + ' de ' + total;
+    if (cnt) cnt.textContent = current + ' / ' + total;
+}
+function cerrarProgreso(exito, mensaje) {
+    const bar = document.getElementById('progreso-bar');
+    const txt = document.getElementById('progreso-txt');
+    const cnt = document.getElementById('progreso-cnt');
+    const overlay = document.getElementById('progreso-overlay');
+    if (!bar || !overlay) return;
+    bar.style.width = '100%'; bar.textContent = '100%';
+    bar.classList.add(exito ? 'done' : 'error');
+    if (txt) txt.innerHTML = mensaje || '¡Completado!';
+    if (cnt) cnt.textContent = '';
+    setTimeout(() => { overlay.style.transition = 'opacity 0.4s ease'; overlay.style.opacity = '0'; setTimeout(() => overlay.remove(), 400); }, 800);
+}
+async function accionConProgreso(url, formData, titulo) {
+    mostrarProgreso(titulo);
+    try {
+        const response = await fetch(url, { method: 'POST', body: formData, headers: { 'X-CSRFToken': formData.get('csrfmiddlewaretoken') } });
+        const ct = response.headers.get('Content-Type') || '';
+        if (ct.includes('text/html')) { const html = await response.text(); document.open(); document.write(html); document.close(); return; }
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop();
+            for (const line of lines) {
+                if (!line.trim()) continue;
+                try {
+                    const data = JSON.parse(line);
+                    if (data.status === 'processing' || data.status === 'start') {
+                        _actualizarBarraProgreso(data.current, data.total);
+                    } else if (data.status === 'done') {
+                        _actualizarBarraProgreso(data.total, data.total);
+                        cerrarProgreso(true, data.message || '¡Completado!');
+                        setTimeout(() => { window.location.href = data.redirect || location.href; }, 900);
+                        return;
+                    } else if (data.status === 'error') {
+                        cerrarProgreso(false, data.message || 'Error en el proceso');
+                        return;
+                    }
+                } catch(e) {}
+            }
+        }
+        cerrarProgreso(true, '¡Completado!');
+        setTimeout(() => { window.location.href = location.href; }, 900);
+    } catch (err) {
+        cerrarProgreso(false, 'Error de conexión: ' + err.message);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    const fileInput = document.querySelector('input[name="excel_file"]');
+    const uploadButton = document.getElementById('upload-button');
+
+    function toggleUploadButton() {
+        uploadButton.disabled = !fileInput.files.length;
+    }
+    fileInput.addEventListener('change', toggleUploadButton);
+
+    // Interceptar envío del formulario para usar AJAX con progreso
+    uploadButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        const form = uploadButton.closest('form');
+        const formData = new FormData(form);
+        formData.append('upload_excel', 'true');
+        accionConProgreso(form.action || window.location.href, formData, 'Validando estudios...');
+    });
+});
+</script>
+
+{% endblock %}

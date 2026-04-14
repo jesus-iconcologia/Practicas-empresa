@@ -1,0 +1,60 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block title %}
+{% if modo == 'crear' %}Añadir reparación{% else %}Editar reparación{% endif %}
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+
+<div class="form-container">
+    <div class="acciones-estudios">
+        <a href="{% url 'detalles_congelador' congelador.congelador %}" class="accion-btn accion-secundaria">
+            Volver a gestionar
+        </a>
+    </div>
+
+    <div class="form-header">
+        <h1>{% if modo == 'crear' %}Añadir reparación{% else %}Editar reparación{% endif %}</h1>
+        <p class="form-subtitle">Recurso: {{ congelador.congelador }}</p>
+    </div>
+
+    <form method="post" class="styled-form">
+        {% csrf_token %}
+
+        <div class="form-card">
+            <h2>Datos de la reparación</h2>
+            {% for field in form %}
+                <div class="form-field">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                        {% if field.field.required %}
+                            <span class="required">*</span>
+                        {% endif %}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+
+                    {% if field.errors %}
+                        <div class="error-text">{{ field.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="accion-btn accion-primaria">
+                {% if modo == 'crear' %}Guardar reparación{% else %}Guardar cambios{% endif %}
+            </button>
+            <a href="{% url 'detalles_congelador' congelador.congelador %}" class="accion-btn accion-secundaria">
+                Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

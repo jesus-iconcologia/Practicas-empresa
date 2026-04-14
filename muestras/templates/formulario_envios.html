@@ -1,0 +1,111 @@
+{% extends "master.html" %}
+
+{% block title %}
+Envio de Muestras
+{% endblock %}
+{% load static %}
+<!-- Formulario para registrar un nuevo envío de muestras -->
+{% block content %}
+<link rel ="stylesheet" href="{% static 'css/muestras_todas.css' %}">
+<div class="form-container">
+
+    <!-- BARRA DE ACCIONES -->
+    <div class="acciones-estudios">
+        <a href="/muestras" class="accion-btn accion-secundaria">
+            ⬅ Volver a muestras
+        </a>
+
+        <a href="{% url 'upload_excel_envios' centro.id %}"
+           class="accion-btn accion-secundaria">
+            📄 Registrar envío por Excel
+        </a>
+    </div>
+
+    <!-- CABECERA -->
+    <div class="form-header">
+        <h1>📦 Registrar nuevo envío</h1>
+        <p class="form-subtitle">
+            Complete los volúmenes y concentraciones a enviar para cada muestra.
+        </p>
+    </div>
+
+    <!-- INFO DEL CENTRO -->
+    <div class="form-card info-card">
+        <h2>🏥 Centro de destino</h2>
+        <p><strong>Centro:</strong> {{ centro.centro }}</p>
+        <p><strong>Lugar:</strong> {{ centro.lugar }}</p>
+    </div>
+
+    <!-- FORMULARIO -->
+    <form method="post" action="{% url 'registrar_envio' centro.id %}">
+        {% csrf_token %}
+
+        <!-- TABLA DE MUESTRAS -->
+        <div class="table-container">
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Muestra</th>
+                        <th>Volumen actual</th>
+                        <th>Concentración actual</th>
+                        <th>Volumen a enviar</th>
+                        <th>Concentración a enviar</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for muestra in muestras %}
+                    <tr>
+                        <td>
+                            <input type="hidden" name="muestra_id" value="{{ muestra.id }}">
+                            {{ muestra.nom_lab }}
+                        </td>
+
+                        <td>
+                            {{ muestra.volumen_actual }}
+                            {{ muestra.unidad_volumen }}
+                        </td>
+
+                        <td>
+                            {{ muestra.concentracion_actual }}
+                            {{ muestra.unidad_concentracion }}
+                        </td>
+
+                        <td>
+                            <div class="inline-input">
+                                <input type="number"
+                                       name="volumen_enviado"
+                                       required
+                                       step="0.01"
+                                       min="0"
+                                       max="{{ muestra.volumen_actual }}">
+                                <span>{{ muestra.unidad_volumen }}</span>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="inline-input">
+                                <input type="number"
+                                       name="concentracion_enviada"
+                                       required
+                                       step="0.01"
+                                       min="0">
+                                <span>{{ muestra.unidad_concentracion }}</span>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ACCIONES -->
+        <div class="form-actions">
+            <button type="submit" class="accion-btn accion-primaria">
+                📤 Registrar envío
+            </button>
+        </div>
+    </form>
+
+</div>
+{% endblock %}

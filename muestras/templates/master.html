@@ -1,0 +1,148 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{% endblock %}</title>
+
+  <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}?v=3">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo-section">
+      <img src="{% static 'img/logo.png' %}" alt="Logo">
+      <span class="app-name">GesLab</span>
+    </div>
+
+    {% if user.is_authenticated %}
+    <nav class="main-nav">
+      <div class="menu-center">
+        <a href="/muestras/" class="{% if request.path == '/' or request.path|slice:':9' == '/muestras' and request.path|slice:':20' != '/muestras/materiales' %}active{% endif %}">Muestras</a>
+        {% if perms.muestras.can_add_muestras_web %}
+          <a href="/muestras/materiales" class="{% if request.path|slice:':20' == '/muestras/materiales' %}active{% endif %}">Materiales</a>
+        {% endif %}
+        {% if perms.muestras.can_view_localizaciones_web %}
+          <a href="/archivo" class="{% if request.path|slice:':8' == '/archivo' %}active{% endif %}">Recursos</a>
+        {% endif %}
+        <a href="/estudios" class="{% if request.path|slice:':9' == '/estudios' %}active{% endif %}">Estudios</a>
+        {% if user.is_superuser %}
+          <a href="/admin" class="{% if request.path|slice:':6' == '/admin' %}active{% endif %}">Administracion</a>
+        {% endif %}
+      </div>
+
+      <div class="menu-auth">
+        <form action="{% url 'logout' %}" method="post">
+          {% csrf_token %}
+          <button type="submit">Cerrar sesion ({{ user.username }})</button>
+        </form>
+      </div>
+    </nav>
+    {% endif %}
+  </header>
+
+  <div class="page-container">
+    <div class="page-content">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+
+  <div id="app-confirm-modal" class="app-confirm-modal" hidden aria-hidden="true">
+    <div class="app-confirm-backdrop" data-confirm-close></div>
+    <div class="app-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="app-confirm-title">
+      <div class="app-confirm-header">
+        <h2 id="app-confirm-title">Confirmar accion</h2>
+      </div>
+      <div class="app-confirm-body">
+        <p id="app-confirm-message">¿Quieres continuar?</p>
+      </div>
+      <div class="app-confirm-actions">
+        <button type="button" class="accion-btn accion-secundaria" id="app-confirm-cancel">Cancelar</button>
+        <button type="button" class="accion-btn accion-peligro" id="app-confirm-accept">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const modal = document.getElementById('app-confirm-modal');
+      const titleEl = document.getElementById('app-confirm-title');
+      const messageEl = document.getElementById('app-confirm-message');
+      const acceptBtn = document.getElementById('app-confirm-accept');
+      const cancelBtn = document.getElementById('app-confirm-cancel');
+      const closeTargets = modal ? modal.querySelectorAll('[data-confirm-close]') : [];
+      let resolver = null;
+      let lastFocused = null;
+
+      function closeModal(result) {
+        if (!modal || modal.hasAttribute('hidden')) {
+          return;
+        }
+        modal.setAttribute('hidden', '');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        if (resolver) {
+          resolver(result);
+          resolver = null;
+        }
+        if (lastFocused && typeof lastFocused.focus === 'function') {
+          lastFocused.focus();
+        }
+      }
+
+      window.confirmarAccionApp = function (options) {
+        if (!modal) {
+          return Promise.resolve(window.confirm(options && options.message ? options.message : '¿Quieres continuar?'));
+        }
+
+        const settings = options || {};
+        titleEl.textContent = settings.title || 'Confirmar accion';
+        messageEl.textContent = settings.message || '¿Quieres continuar?';
+        acceptBtn.textContent = settings.confirmText || 'Confirmar';
+        cancelBtn.textContent = settings.cancelText || 'Cancelar';
+        acceptBtn.classList.toggle('accion-peligro', settings.variant !== 'primary');
+        acceptBtn.classList.toggle('accion-primaria', settings.variant === 'primary');
+
+        lastFocused = document.activeElement;
+        modal.removeAttribute('hidden');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        setTimeout(function () { acceptBtn.focus(); }, 0);
+
+        return new Promise(function (resolve) {
+          resolver = resolve;
+        });
+      };
+
+      acceptBtn.addEventListener('click', function () {
+        closeModal(true);
+      });
+
+      cancelBtn.addEventListener('click', function () {
+        closeModal(false);
+      });
+
+      closeTargets.forEach(function (target) {
+        target.addEventListener('click', function () {
+          closeModal(false);
+        });
+      });
+
+      document.addEventListener('keydown', function (event) {
+        if (!modal || modal.hasAttribute('hidden')) {
+          return;
+        }
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          closeModal(false);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

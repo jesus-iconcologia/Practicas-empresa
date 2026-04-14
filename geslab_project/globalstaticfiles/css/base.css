@@ -1,0 +1,314 @@
+/* Estilos globales compartidos por todas las pantallas de la aplicacion. */
+body {
+    margin: 0;
+    background-color: #e8f0fe;
+    font-family: 'Inter', 'Roboto', sans-serif;
+    color: #1f2937;
+}
+
+/* Cuando hay un modal abierto, se bloquea el scroll del fondo. */
+body.modal-open {
+    overflow: hidden;
+}
+
+/* Cabecera principal fija con logo, menu central y zona de sesion. */
+.topbar {
+    background-color: #ffffff;
+    border-bottom: 1px solid #dfe3e6;
+    min-height: 70px;
+    padding: 12px 32px;
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 32px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+/* Agrupa el logo y el nombre de la aplicacion. */
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+}
+
+.logo-section img {
+    height: 38px;
+    width: auto;
+    display: block;
+}
+
+.app-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a3d7c;
+}
+
+/* Navegacion superior comun a todas las vistas autenticadas. */
+.main-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    min-width: 0;
+    width: 100%;
+}
+
+/* Centro del menu: enlaces principales del aplicativo. */
+.menu-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(28px, 4vw, 88px);
+    flex: 1;
+    flex-wrap: nowrap;
+    min-width: 0;
+}
+
+.menu-center-empty {
+    min-height: 1px;
+}
+
+/* Zona derecha del menu: acciones de usuario, como cerrar sesion. */
+.menu-auth {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-shrink: 0;
+    margin-left: 12px;
+}
+
+/* Estilo base de los enlaces del menu superior. */
+.main-nav a {
+    text-decoration: none;
+    color: #1a3d7c;
+    font-weight: 600;
+    padding: 9px 14px;
+    border-radius: 6px;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.main-nav a:hover {
+    background-color: #e8f0fe;
+}
+
+.main-nav a.active {
+    background-color: #e8f0fe;
+    box-shadow: inset 0 0 0 2px #1a3d7c;
+}
+
+/* Boton del menu superior usado sobre todo para acciones de sesion. */
+.main-nav button {
+    background-color: #1a3d7c;
+    color: #ffffff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.main-nav button:hover {
+    background-color: #163366;
+}
+
+/* Contenedor general que centra el contenido de cada pagina. */
+.page-container {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Tarjeta principal donde se renderiza el contenido de cada vista. */
+.page-content {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 1250px;
+    padding: 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* Sistema reutilizable de botones para acciones primarias, secundarias y de peligro. */
+.accion-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 40px;
+    padding: 0 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.05s ease;
+    appearance: none;
+    font-family: inherit;
+    line-height: 1;
+}
+
+.accion-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(26, 61, 124, 0.3);
+}
+
+.accion-btn:active {
+    transform: translateY(1px);
+}
+
+.accion-primaria {
+    background-color: #1a3d7c;
+    color: #ffffff;
+}
+
+.accion-primaria:hover {
+    background-color: #163366;
+}
+
+.accion-secundaria {
+    background-color: #f0f5ff;
+    color: #1a3d7c;
+}
+
+.accion-secundaria:hover {
+    background-color: #e1ebff;
+}
+
+.accion-peligro {
+    background-color: #d32f2f;
+    color: #ffffff;
+}
+
+.accion-peligro:hover {
+    background-color: #b71c1c;
+}
+
+.accion-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Maquetacion comun para pantallas de detalle con datos a la izquierda e imagen a la derecha. */
+.detalle-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 20px;
+    align-items: start;
+}
+
+.detalle-datos p {
+    margin: 6px 0;
+    font-size: 14px;
+}
+
+.detalle-imagen img {
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Modal global de confirmacion reutilizado por varias acciones del sistema. */
+.app-confirm-modal[hidden] {
+    display: none;
+}
+
+.app-confirm-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.app-confirm-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(3px);
+}
+
+.app-confirm-dialog {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 420px);
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 24px 48px rgba(15, 23, 42, 0.24);
+    overflow: hidden;
+    border: 1px solid #dbe4f0;
+}
+
+.app-confirm-header {
+    padding: 18px 22px 10px;
+}
+
+.app-confirm-header h2 {
+    margin: 0;
+    color: #1a3d7c;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.app-confirm-body {
+    padding: 0 22px 18px;
+}
+
+.app-confirm-body p {
+    margin: 0;
+    color: #334155;
+    line-height: 1.5;
+    font-size: 15px;
+}
+
+.app-confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 0 22px 22px;
+}
+
+/* Ajustes para movil y pantallas estrechas. */
+@media (max-width: 900px) {
+    .topbar {
+        display: flex;
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 12px 18px;
+    }
+
+    .main-nav {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .menu-center {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .menu-auth {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .page-content {
+        padding: 24px 18px;
+    }
+
+    .detalle-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,772 @@
+﻿{% extends 'master.html' %}
+{% load static %}
+
+{% block title %}
+Añadir muestras
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+
+<style>
+  .aliquot-shell { display: flex; flex-direction: column; gap: 18px; }
+  .aliquot-list { display: flex; flex-direction: column; gap: 18px; }
+  .material-block-list { display: flex; flex-direction: column; gap: 18px; }
+  .material-block { border: 1px solid #d7e3ef; border-radius: 18px; background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%); padding: 20px; box-shadow: 0 10px 26px rgba(31, 66, 108, 0.06); }
+  .material-block[hidden] { display: none; }
+  .material-block-head { display: grid; grid-template-columns: minmax(260px, 1.4fr) minmax(160px, 0.8fr) auto auto; gap: 14px; align-items: end; margin-bottom: 18px; }
+  .material-block-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+  .material-block-rows { display: flex; flex-direction: column; gap: 14px; }
+  .aliquot-card { border: 1px solid #dbe6f0; border-radius: 16px; background: #ffffff; padding: 18px; box-shadow: 0 6px 16px rgba(31, 66, 108, 0.05); }
+  .aliquot-card[hidden] { display: none; }
+  input[name$="-DELETE"] { display: none; }
+  .aliquot-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+  .aliquot-card-head h3 { margin: 0; color: #173a63; }
+  .aliquot-subsection { grid-column: 1 / -1; margin-top: 6px; padding: 14px 16px; border: 1px solid #d9e3ef; border-radius: 14px; background: #fbfdff; }
+  .aliquot-subsection[hidden] { display: none; }
+  .aliquot-subsection-title { margin: 0 0 12px; color: #173a63; font-size: 15px; }
+  .aliquot-subgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px 18px; }
+  .aliquot-remove { border: 1px solid #efc7c7; background: #fff4f4; color: #8c2d2d; border-radius: 10px; padding: 8px 12px; cursor: pointer; font-weight: 600; }
+  .aliquot-remove:hover { background: #ffe8e8; }
+  .materials-hint { border: 1px dashed #cad8e5; border-radius: 12px; padding: 12px 14px; background: #fbfdff; color: #5e7387; font-size: 14px; }
+  .dynamic-group[hidden] { display: none; }
+  .location-grid-shell { margin-top: 12px; padding: 14px; border: 1px solid #d9e3ef; border-radius: 14px; background: linear-gradient(180deg, #fbfdff 0%, #f3f8fd 100%); }
+  .location-grid-shell[hidden] { display: none; }
+  .location-grid-legend { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .location-grid-status { color: #5f7388; font-size: 13px; font-weight: 600; }
+  .location-grid { display: flex; flex-direction: column; gap: 8px; }
+  .location-grid-row { display: grid; grid-template-columns: 34px 1fr; gap: 8px; align-items: start; }
+  .location-row-label { min-height: 44px; border-radius: 8px; background: #e8f1fb; color: #1c4a78; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .location-row-cells { display: grid; grid-template-columns: repeat(auto-fit, minmax(62px, 1fr)); gap: 6px; }
+  .location-cell { min-height: 44px; border-radius: 8px; border: 1px solid #cdd9e6; background: linear-gradient(180deg, #f8fafc 0%, #eef3f7 100%); color: #274c77; padding: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 3px; cursor: pointer; transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease; }
+  .location-cell:hover { transform: translateY(-1px); border-color: #8fb5dc; }
+  .location-cell.is-disabled { cursor: not-allowed; background: linear-gradient(180deg, #ffe3e3 0%, #ffcfcf 100%); border-color: #e39a9a; color: #7f1d1d; }
+  .location-cell.is-reserved { cursor: not-allowed; background: linear-gradient(180deg, #fff3cf 0%, #ffe29a 100%); border-color: #e0b34f; color: #7a5606; }
+  .location-cell.is-selected { border-color: #2b78c7; box-shadow: inset 0 0 0 1px rgba(43, 120, 199, 0.28); background: linear-gradient(180deg, #dff1ff 0%, #c9e6ff 100%); }
+  .location-cell-code { font-size: 11px; font-weight: 700; color: #4e6782; }
+  .location-cell-value { font-size: 12px; font-weight: 700; color: #173a63; text-align: center; word-break: break-word; }
+  .location-empty { padding: 10px 12px; border-radius: 10px; border: 1px dashed #cbd8e5; background: #fbfdff; color: #667b91; font-size: 13px; }
+  .error-box { margin-bottom: 12px; padding: 10px 12px; border-radius: 10px; background: #fff1f1; border: 1px solid #efcaca; color: #8b2f2f; font-size: 13px; }
+  @media (max-width: 860px) {
+    .material-block-head { grid-template-columns: 1fr; }
+    .location-grid-row { grid-template-columns: 28px 1fr; gap: 6px; }
+    .location-row-cells { grid-template-columns: repeat(auto-fit, minmax(54px, 1fr)); gap: 5px; }
+    .location-row-label, .location-cell { min-height: 40px; }
+  }
+</style>
+
+<div class="form-container aliquot-shell">
+  <div class="form-header">
+    <h1>➕ Añadir muestras</h1>
+    <p class="form-subtitle">Primero indique el individuo y el estudio asociado. Después podrá añadir una o varias alícuotas, cada una con su material, datos propios y ubicación.</p>
+  </div>
+
+  {% if materiales_count == 0 %}
+    <div class="materials-hint">No hay materiales activos disponibles. Cree al menos un material en <a href="{% url 'materiales_todos' %}">Materiales</a> para poder registrar alícuotas.</div>
+  {% else %}
+    <div class="materials-hint">Los materiales se gestionan desde <a href="{% url 'materiales_todos' %}">Materiales</a>. Según el material seleccionado, el formulario mostrará solo los campos que correspondan.</div>
+  {% endif %}
+
+  <form method="post" class="styled-form" id="aliquot-form">
+    {% csrf_token %}
+
+    <div class="form-card">
+      <h2>Datos del individuo</h2>
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="{{ individuo_form.id_individuo.id_for_label }}">{{ individuo_form.id_individuo.label }} <span class="required">*</span></label>
+          {{ individuo_form.id_individuo }}
+          {% if individuo_form.id_individuo.errors %}<div class="error-text">{{ individuo_form.id_individuo.errors|striptags }}</div>{% endif %}
+        </div>
+        <div class="form-field">
+          <label for="{{ individuo_form.estudio.id_for_label }}">{{ individuo_form.estudio.label }}</label>
+          {{ individuo_form.estudio }}
+          {% if individuo_form.estudio.errors %}<div class="error-text">{{ individuo_form.estudio.errors|striptags }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h2>Datos de las muestras</h2>
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="{{ datos_muestras_form.fecha_extraccion.id_for_label }}">{{ datos_muestras_form.fecha_extraccion.label }}</label>
+          {{ datos_muestras_form.fecha_extraccion }}
+          {% if datos_muestras_form.fecha_extraccion.errors %}<div class="error-text">{{ datos_muestras_form.fecha_extraccion.errors|striptags }}</div>{% endif %}
+        </div>
+        <div class="form-field">
+          <label for="{{ datos_muestras_form.fecha_llegada.id_for_label }}">{{ datos_muestras_form.fecha_llegada.label }}</label>
+          {{ datos_muestras_form.fecha_llegada }}
+          {% if datos_muestras_form.fecha_llegada.errors %}<div class="error-text">{{ datos_muestras_form.fecha_llegada.errors|striptags }}</div>{% endif %}
+        </div>
+        <div class="form-field">
+          <label for="{{ datos_muestras_form.centro_procedencia.id_for_label }}">{{ datos_muestras_form.centro_procedencia.label }}</label>
+          {{ datos_muestras_form.centro_procedencia }}
+          {% if datos_muestras_form.centro_procedencia.errors %}<div class="error-text">{{ datos_muestras_form.centro_procedencia.errors|striptags }}</div>{% endif %}
+        </div>
+        <div class="form-field" style="grid-column: 1 / -1;">
+          <label for="{{ datos_muestras_form.observaciones.id_for_label }}">{{ datos_muestras_form.observaciones.label }}</label>
+          {{ datos_muestras_form.observaciones }}
+          {% if datos_muestras_form.observaciones.errors %}<div class="error-text">{{ datos_muestras_form.observaciones.errors|striptags }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="aliquot-card-head" style="margin-bottom: 18px;">
+        <div>
+          <h2 style="margin:0;">Alícuotas</h2>
+          <p class="form-subtitle" style="margin:6px 0 0;">Cree bloques por material, indique cuántas alícuotas necesita y después complete los datos y la ubicación de cada una.</p>
+        </div>
+      </div>
+
+      {{ aliquota_formset.management_form }}
+
+      <div id="material-block-list" class="material-block-list"></div>
+
+      <div id="server-row-pool" hidden>
+        {% for form in aliquota_formset %}
+          <section class="aliquot-card aliquot-entry" data-prefix="{{ form.prefix }}" data-material-id="{{ form.material.value|default:'' }}" {% if form.DELETE.value %}hidden data-deleted="true"{% endif %}>
+            {{ form.DELETE }}
+            {{ form.subposicion_id }}
+            <div class="aliquot-card-head">
+              <h3>Alicuota <span class="aliquot-number">{{ forloop.counter }}</span></h3>
+              <button type="button" class="aliquot-remove">Eliminar</button>
+            </div>
+            {% if form.non_field_errors %}<div class="error-box">{{ form.non_field_errors|striptags }}</div>{% endif %}
+            <div class="form-grid">
+              {{ form.material.as_hidden }}
+              <div class="form-field"><label for="{{ form.nom_lab.id_for_label }}">ID muestra <span class="required">*</span></label>{{ form.nom_lab }}{% if form.nom_lab.errors %}<div class="error-text">{{ form.nom_lab.errors|striptags }}</div>{% endif %}</div>
+              <div class="aliquot-subsection dynamic-group js-volume-fields">
+                <h4 class="aliquot-subsection-title">Volumen</h4>
+                <div class="aliquot-subgrid">
+                  <div class="form-field"><label for="{{ form.volumen_actual.id_for_label }}">Volumen actual</label>{{ form.volumen_actual }}{% if form.volumen_actual.errors %}<div class="error-text">{{ form.volumen_actual.errors|striptags }}</div>{% endif %}</div>
+                  <div class="form-field"><label for="{{ form.unidad_volumen.id_for_label }}">Unidad de volumen</label>{{ form.unidad_volumen }}{% if form.unidad_volumen.errors %}<div class="error-text">{{ form.unidad_volumen.errors|striptags }}</div>{% endif %}</div>
+                </div>
+              </div>
+              <div class="aliquot-subsection dynamic-group js-concentration-fields">
+                <h4 class="aliquot-subsection-title">Concentración</h4>
+                <div class="aliquot-subgrid">
+                  <div class="form-field"><label for="{{ form.concentracion_actual.id_for_label }}">Concentración actual</label>{{ form.concentracion_actual }}{% if form.concentracion_actual.errors %}<div class="error-text">{{ form.concentracion_actual.errors|striptags }}</div>{% endif %}</div>
+                  <div class="form-field"><label for="{{ form.unidad_concentracion.id_for_label }}">Unidad de concentración</label>{{ form.unidad_concentracion }}{% if form.unidad_concentracion.errors %}<div class="error-text">{{ form.unidad_concentracion.errors|striptags }}</div>{% endif %}</div>
+                </div>
+              </div>
+              <div class="aliquot-subsection dynamic-group js-block-fields">
+                <h4 class="aliquot-subsection-title">Unidades</h4>
+                <div class="aliquot-subgrid">
+                  <div class="form-field"><label for="{{ form.masa_actual.id_for_label }}" class="js-block-label">Unidades de bloque</label>{{ form.masa_actual }}{% if form.masa_actual.errors %}<div class="error-text">{{ form.masa_actual.errors|striptags }}</div>{% endif %}</div>
+                  <div class="form-field"><label for="{{ form.unidad_masa.id_for_label }}">Unidad de cantidad</label>{{ form.unidad_masa }}{% if form.unidad_masa.errors %}<div class="error-text">{{ form.unidad_masa.errors|striptags }}</div>{% endif %}</div>
+                </div>
+              </div>
+              {{ form.fecha_extraccion.as_hidden }}
+              {{ form.fecha_llegada.as_hidden }}
+              {{ form.centro_procedencia.as_hidden }}
+              {{ form.observaciones.as_hidden }}
+              <div class="form-field"><label for="{{ form.estado_actual.id_for_label }}">Estado actual <span class="required">*</span></label>{{ form.estado_actual }}{% if form.estado_actual.errors %}<div class="error-text">{{ form.estado_actual.errors|striptags }}</div>{% endif %}</div>
+            </div>
+
+            <div class="form-card" style="margin-top: 18px; background: #ffffff;">
+              <h4 style="margin:0 0 14px; color:#173a63;">Ubicación de esta alícuota</h4>
+              <div class="form-grid">
+                <div class="form-field"><label for="{{ form.prefix }}-congelador_id">Recurso</label><select id="{{ form.prefix }}-congelador_id" data-role="recurso"><option value="">-- Seleccionar recurso --</option>{% for congelador in congeladores %}<option value="{{ congelador.id }}" data-structure="{{ congelador.tipo_estructura|default:'' }}">{{ congelador.congelador }}</option>{% endfor %}</select></div>
+                <div class="form-field"><label for="{{ form.prefix }}-estante_id">Estante</label><select id="{{ form.prefix }}-estante_id" data-role="estante"><option value="">-- Seleccionar estante --</option></select></div>
+                <div class="form-field"><label for="{{ form.prefix }}-rack_id" data-role="rack-label">Rack</label><select id="{{ form.prefix }}-rack_id" data-role="rack"><option value="">-- Seleccionar rack --</option></select></div>
+                <div class="form-field" data-role="bandeja-field"><label for="{{ form.prefix }}-bandeja_id">Bandeja</label><select id="{{ form.prefix }}-bandeja_id" data-role="bandeja"><option value="">-- Seleccionar bandeja --</option></select></div>
+                <div class="form-field"><label for="{{ form.prefix }}-caja_id">Caja</label><select id="{{ form.prefix }}-caja_id" data-role="caja"><option value="">-- Seleccionar caja --</option></select></div>
+              </div>
+              <div id="subposicion-grid-shell" class="location-grid-shell" data-role="grid-shell" hidden>
+                <div class="location-grid-legend"><strong>Seleccione la subposición</strong><span class="location-grid-status" data-role="selected-label">Ninguna seleccionada</span></div>
+                <div class="location-grid" data-role="grid-root"></div>
+              </div>
+            </div>
+          </section>
+        {% endfor %}
+      </div>
+
+      <div style="margin-top: 18px; display: flex; justify-content: flex-start;">
+        <button type="button" class="accion-btn accion-primaria" id="add-block-btn">➕ Añadir bloque de alícuotas</button>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="accion-btn accion-primaria" {% if materiales_count == 0 %}disabled{% endif %}>💾 Guardar alícuotas</button>
+      <a href="/muestras" class="accion-btn accion-secundaria">↩ Volver a muestras</a>
+    </div>
+  </form>
+</div>
+
+<template id="aliquot-empty-template">
+  <section class="aliquot-card aliquot-entry" data-prefix="aliquotas-__prefix__">
+    {{ aliquota_formset.empty_form.DELETE }}
+    {{ aliquota_formset.empty_form.subposicion_id }}
+    <div class="aliquot-card-head"><h3>Alicuota <span class="aliquot-number"></span></h3><button type="button" class="aliquot-remove">Eliminar</button></div>
+    <div class="form-grid">
+      {{ aliquota_formset.empty_form.material.as_hidden }}
+      <div class="form-field"><label for="{{ aliquota_formset.empty_form.nom_lab.id_for_label }}">ID muestra <span class="required">*</span></label>{{ aliquota_formset.empty_form.nom_lab }}</div>
+      <div class="aliquot-subsection dynamic-group js-volume-fields">
+        <h4 class="aliquot-subsection-title">Volumen</h4>
+        <div class="aliquot-subgrid">
+          <div class="form-field"><label for="{{ aliquota_formset.empty_form.volumen_actual.id_for_label }}">Volumen actual</label>{{ aliquota_formset.empty_form.volumen_actual }}</div>
+          <div class="form-field"><label for="{{ aliquota_formset.empty_form.unidad_volumen.id_for_label }}">Unidad de volumen</label>{{ aliquota_formset.empty_form.unidad_volumen }}</div>
+        </div>
+      </div>
+      <div class="aliquot-subsection dynamic-group js-concentration-fields">
+        <h4 class="aliquot-subsection-title">Concentración</h4>
+        <div class="aliquot-subgrid">
+          <div class="form-field"><label for="{{ aliquota_formset.empty_form.concentracion_actual.id_for_label }}">Concentración actual</label>{{ aliquota_formset.empty_form.concentracion_actual }}</div>
+          <div class="form-field"><label for="{{ aliquota_formset.empty_form.unidad_concentracion.id_for_label }}">Unidad de concentración</label>{{ aliquota_formset.empty_form.unidad_concentracion }}</div>
+        </div>
+      </div>
+      <div class="aliquot-subsection dynamic-group js-block-fields">
+        <h4 class="aliquot-subsection-title">Unidades</h4>
+        <div class="aliquot-subgrid">
+          <div class="form-field"><label for="{{ aliquota_formset.empty_form.masa_actual.id_for_label }}" class="js-block-label">Unidades de bloque</label>{{ aliquota_formset.empty_form.masa_actual }}</div>
+          <div class="form-field"><label for="{{ aliquota_formset.empty_form.unidad_masa.id_for_label }}">Unidad de cantidad</label>{{ aliquota_formset.empty_form.unidad_masa }}</div>
+        </div>
+      </div>
+      {{ aliquota_formset.empty_form.fecha_extraccion.as_hidden }}
+      {{ aliquota_formset.empty_form.fecha_llegada.as_hidden }}
+      {{ aliquota_formset.empty_form.centro_procedencia.as_hidden }}
+      {{ aliquota_formset.empty_form.observaciones.as_hidden }}
+      <div class="form-field"><label for="{{ aliquota_formset.empty_form.estado_actual.id_for_label }}">Estado actual <span class="required">*</span></label>{{ aliquota_formset.empty_form.estado_actual }}</div>
+    </div>
+    <div class="form-card" style="margin-top: 18px; background: #ffffff;">
+      <h4 style="margin:0 0 14px; color:#173a63;">Ubicación de esta alícuota</h4>
+      <div class="form-grid">
+        <div class="form-field"><label for="aliquotas-__prefix__-congelador_id">Recurso</label><select id="aliquotas-__prefix__-congelador_id" data-role="recurso"><option value="">-- Seleccionar recurso --</option>{% for congelador in congeladores %}<option value="{{ congelador.id }}" data-structure="{{ congelador.tipo_estructura|default:'' }}">{{ congelador.congelador }}</option>{% endfor %}</select></div>
+        <div class="form-field"><label for="aliquotas-__prefix__-estante_id">Estante</label><select id="aliquotas-__prefix__-estante_id" data-role="estante"><option value="">-- Seleccionar estante --</option></select></div>
+        <div class="form-field"><label for="aliquotas-__prefix__-rack_id" data-role="rack-label">Rack</label><select id="aliquotas-__prefix__-rack_id" data-role="rack"><option value="">-- Seleccionar rack --</option></select></div>
+        <div class="form-field" data-role="bandeja-field"><label for="aliquotas-__prefix__-bandeja_id">Bandeja</label><select id="aliquotas-__prefix__-bandeja_id" data-role="bandeja"><option value="">-- Seleccionar bandeja --</option></select></div>
+        <div class="form-field"><label for="aliquotas-__prefix__-caja_id">Caja</label><select id="aliquotas-__prefix__-caja_id" data-role="caja"><option value="">-- Seleccionar caja --</option></select></div>
+      </div>
+      <div class="location-grid-shell" data-role="grid-shell" hidden>
+        <div class="location-grid-legend"><strong>Seleccione la subposición</strong><span class="location-grid-status" data-role="selected-label">Ninguna seleccionada</span></div>
+        <div class="location-grid" data-role="grid-root"></div>
+      </div>
+    </div>
+  </section>
+</template>
+
+<template id="material-block-template">
+  <section class="material-block">
+    <div class="material-block-head">
+      <div class="form-field" style="margin:0;">
+        <label>Material</label>
+        <select data-role="block-material">
+          <option value="">-- Seleccionar material --</option>
+          {% for material in materiales %}
+            <option value="{{ material.id }}">{{ material.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-field" style="margin:0;">
+        <label>Cantidad de alícuotas</label>
+        <input type="number" min="1" value="1" data-role="block-quantity">
+      </div>
+      <div class="material-block-actions">
+        <button type="button" class="accion-btn accion-peligro" data-role="remove-block">Eliminar bloque</button>
+      </div>
+    </div>
+    <div class="material-block-rows" data-role="block-rows"></div>
+  </section>
+</template>
+
+<script>
+  const materialConfigs = {{ materiales_json|safe }};
+  const blockList = document.getElementById('material-block-list');
+  const serverRowPool = document.getElementById('server-row-pool');
+  const totalFormsInput = document.getElementById('id_aliquotas-TOTAL_FORMS');
+  const emptyTemplate = document.getElementById('aliquot-empty-template');
+  const blockTemplate = document.getElementById('material-block-template');
+  const addBlockButton = document.getElementById('add-block-btn');
+  const sharedFechaExtraccion = document.getElementById('{{ datos_muestras_form.fecha_extraccion.id_for_label }}');
+  const sharedFechaLlegada = document.getElementById('{{ datos_muestras_form.fecha_llegada.id_for_label }}');
+  const sharedCentro = document.getElementById('{{ datos_muestras_form.centro_procedencia.id_for_label }}');
+  const sharedObservaciones = document.getElementById('{{ datos_muestras_form.observaciones.id_for_label }}');
+
+  function updateAliquotNumbers() {
+    const cards = Array.from(document.querySelectorAll('.aliquot-entry')).filter(card => !card.hidden);
+    cards.forEach((card, index) => {
+      const label = card.querySelector('.aliquot-number');
+      if (label) label.textContent = index + 1;
+    });
+  }
+
+  function resetSelect(select, placeholder) {
+    select.innerHTML = `<option value="">${placeholder}</option>`;
+  }
+
+  function groupSubpositions(subposiciones) {
+    const grouped = {};
+    subposiciones.forEach(sub => {
+      const rowKey = sub.fila || '-';
+      if (!grouped[rowKey]) grouped[rowKey] = [];
+      grouped[rowKey].push(sub);
+    });
+    return grouped;
+  }
+
+  function sortColumns(a, b) {
+    const aNum = Number(a.columna);
+    const bNum = Number(b.columna);
+    if (!Number.isNaN(aNum) && !Number.isNaN(bNum)) return aNum - bNum;
+    return String(a.columna || '').localeCompare(String(b.columna || ''), undefined, { numeric: true });
+  }
+
+  function materialConfigForValue(materialId) {
+    return materialConfigs[String(materialId || '')] || null;
+  }
+
+  function activeAliquotCards() {
+    return Array.from(document.querySelectorAll('.aliquot-entry')).filter((card) => !card.hidden);
+  }
+
+  function reservedSubpositionsForBox(boxId, currentCard) {
+    const reserved = new Set();
+    if (!boxId) return reserved;
+    activeAliquotCards().forEach((card) => {
+      if (card === currentCard) return;
+      const selectedBoxId = card.dataset.selectedCajaId || '';
+      const subposicionInput = card.querySelector('input[name$="-subposicion_id"]');
+      if (!selectedBoxId || selectedBoxId !== String(boxId) || !subposicionInput || !subposicionInput.value) return;
+      reserved.add(String(subposicionInput.value));
+    });
+    return reserved;
+  }
+
+  function refreshAllLocationGrids() {
+    activeAliquotCards().forEach((card) => {
+      if (typeof card.refreshLocationGrid === 'function') {
+        card.refreshLocationGrid();
+      }
+    });
+  }
+
+  function syncSharedFields(card) {
+    const setValue = (selector, value) => {
+      const field = card.querySelector(selector);
+      if (field) field.value = value || '';
+    };
+    setValue('input[name$="-fecha_extraccion"]', sharedFechaExtraccion ? sharedFechaExtraccion.value : '');
+    setValue('input[name$="-fecha_llegada"]', sharedFechaLlegada ? sharedFechaLlegada.value : '');
+    setValue('input[name$="-centro_procedencia"]', sharedCentro ? sharedCentro.value : '');
+    setValue('textarea[name$="-observaciones"]', sharedObservaciones ? sharedObservaciones.value : '');
+  }
+
+  function setMaterialForRow(card, materialId) {
+    const materialInput = card.querySelector('input[name$="-material"]');
+    if (!materialInput) return;
+    materialInput.value = materialId || '';
+    const config = materialConfigForValue(materialInput.value);
+
+    const setOptions = (selectNameSuffix, values, placeholder) => {
+      const select = card.querySelector(`select[name$="${selectNameSuffix}"]`);
+      if (!select) return;
+      const current = select.value;
+      select.innerHTML = `<option value="">${placeholder}</option>`;
+      (values || []).forEach((value) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        select.appendChild(option);
+      });
+      if ((values || []).includes(current)) select.value = current;
+    };
+
+    setOptions('-unidad_volumen', config ? config.unidades_volumen : [], '-- Seleccionar unidad --');
+    setOptions('-unidad_concentracion', config ? config.unidades_concentracion : [], '-- Seleccionar unidad --');
+    setOptions('-unidad_masa', config ? config.unidades_recuento : [], '-- Seleccionar unidad --');
+    updateMaterialFields(card);
+  }
+
+  function updateMaterialFields(card) {
+    const materialInput = card.querySelector('input[name$="-material"]');
+    const config = materialConfigForValue(materialInput ? materialInput.value : '');
+    const toggleGroup = (selector, visible) => {
+      card.querySelectorAll(selector).forEach((element) => {
+        element.hidden = !visible;
+        element.querySelectorAll('input, select, textarea').forEach((input) => {
+          input.disabled = !visible;
+          if (!visible && input.type !== 'hidden') {
+            if (input.tagName === 'SELECT') input.selectedIndex = 0;
+            else input.value = '';
+          }
+        });
+      });
+    };
+    toggleGroup('.js-volume-fields', config && config.usa_volumen);
+    toggleGroup('.js-concentration-fields', config && config.usa_concentracion);
+    toggleGroup('.js-block-fields', config && config.usa_unidades_bloque);
+  }
+
+  function initLocationCard(card) {
+    if (card.dataset.locationBound === 'true') {
+      return;
+    }
+    card.dataset.locationBound = 'true';
+    const recursoSelect = card.querySelector('[data-role="recurso"]');
+    const estanteSelect = card.querySelector('[data-role="estante"]');
+    const rackSelect = card.querySelector('[data-role="rack"]');
+    const bandejaField = card.querySelector('[data-role="bandeja-field"]');
+    const bandejaSelect = card.querySelector('[data-role="bandeja"]');
+    const cajaSelect = card.querySelector('[data-role="caja"]');
+    const rackLabel = card.querySelector('[data-role="rack-label"]');
+    const subposicionInput = card.querySelector('input[name$="-subposicion_id"]');
+    const gridShell = card.querySelector('[data-role="grid-shell"]');
+    const gridRoot = card.querySelector('[data-role="grid-root"]');
+    const selectedLabel = card.querySelector('[data-role="selected-label"]');
+    let currentSubpositions = [];
+
+    function resourceIsSimple() {
+      const option = recursoSelect.options[recursoSelect.selectedIndex];
+      const structure = option ? option.dataset.structure : '';
+      return structure === 'congelador_20' || structure === 'nevera';
+    }
+
+    function resetGrid(message) {
+      currentSubpositions = [];
+      card.dataset.selectedCajaId = '';
+      gridShell.hidden = true;
+      gridRoot.innerHTML = message ? `<div class="location-empty">${message}</div>` : '';
+      selectedLabel.textContent = 'Ninguna seleccionada';
+      subposicionInput.value = '';
+      refreshAllLocationGrids();
+    }
+
+    card.resetLocationState = function resetLocationState() {
+      resetSelect(recursoSelect, '-- Seleccionar recurso --');
+      {% for congelador in congeladores %}
+        recursoSelect.innerHTML += `<option value="{{ congelador.id }}" data-structure="{{ congelador.tipo_estructura|default:'' }}">{{ congelador.congelador }}</option>`;
+      {% endfor %}
+      resetSelect(estanteSelect, '-- Seleccionar estante --');
+      resetSelect(rackSelect, '-- Seleccionar rack --');
+      resetSelect(bandejaSelect, '-- Seleccionar bandeja --');
+      resetSelect(cajaSelect, '-- Seleccionar caja --');
+      updateStructureUi();
+    };
+
+    function updateStructureUi() {
+      if (resourceIsSimple()) {
+        rackLabel.textContent = 'Cajón';
+        bandejaField.style.display = 'none';
+        resetSelect(rackSelect, '-- Seleccionar cajón --');
+        resetSelect(bandejaSelect, '-- No aplica para este recurso --');
+      } else {
+        rackLabel.textContent = 'Rack';
+        bandejaField.style.display = '';
+        resetSelect(rackSelect, '-- Seleccionar rack --');
+        resetSelect(bandejaSelect, '-- Seleccionar bandeja --');
+      }
+      resetSelect(cajaSelect, '-- Seleccionar caja --');
+      resetGrid('');
+    }
+
+    function selectSubposition(subposicionId, label) {
+      subposicionInput.value = String(subposicionId);
+      card.dataset.selectedCajaId = cajaSelect.value || '';
+      selectedLabel.textContent = `Subposición seleccionada: ${label}`;
+      gridRoot.querySelectorAll('.location-cell').forEach(cell => {
+        cell.classList.toggle('is-selected', cell.dataset.subposicionId === String(subposicionId));
+      });
+      refreshAllLocationGrids();
+    }
+
+    function renderGrid(subposiciones) {
+      gridRoot.innerHTML = '';
+      if (!subposiciones.length) {
+        gridRoot.innerHTML = '<div class="location-empty">Esta caja no tiene subposiciones creadas.</div>';
+        gridShell.hidden = false;
+        return;
+      }
+      const grouped = groupSubpositions(subposiciones);
+      const reservedSubpositions = reservedSubpositionsForBox(cajaSelect.value || '', card);
+      Object.keys(grouped).sort().forEach(rowKey => {
+        const row = document.createElement('div');
+        row.className = 'location-grid-row';
+        const label = document.createElement('div');
+        label.className = 'location-row-label';
+        label.textContent = rowKey;
+        row.appendChild(label);
+        const cells = document.createElement('div');
+        cells.className = 'location-row-cells';
+        grouped[rowKey].sort(sortColumns).forEach(sub => {
+          const isReserved = reservedSubpositions.has(String(sub.id));
+          const isSelected = subposicionInput.value === String(sub.id);
+          const isDisabled = !sub.vacia || (isReserved && !isSelected);
+          const cell = document.createElement('button');
+          cell.type = 'button';
+          cell.className = `location-cell${!sub.vacia ? ' is-disabled' : ''}${isReserved && !isSelected ? ' is-reserved' : ''}${isSelected ? ' is-selected' : ''}`;
+          cell.dataset.subposicionId = String(sub.id);
+          let valueLabel = '-';
+          if (!sub.vacia) valueLabel = sub.muestra_nom_lab || 'Ocupada';
+          else if (isReserved && !isSelected) valueLabel = 'Reservada';
+          cell.innerHTML = `<span class="location-cell-code">${sub.fila || '-'}-${sub.columna || '-'}</span><span class="location-cell-value">${valueLabel}</span>`;
+          if (!isDisabled) cell.addEventListener('click', () => selectSubposition(sub.id, sub.numero));
+          else cell.disabled = true;
+          cells.appendChild(cell);
+        });
+        row.appendChild(cells);
+        gridRoot.appendChild(row);
+      });
+      gridShell.hidden = false;
+    }
+
+    card.refreshLocationGrid = function refreshLocationGrid() {
+      if (!cajaSelect.value || !currentSubpositions.length) return;
+      renderGrid(currentSubpositions);
+    };
+
+    recursoSelect.addEventListener('change', async function() {
+      updateStructureUi();
+      resetSelect(estanteSelect, '-- Seleccionar estante --');
+      if (!this.value) return;
+      try {
+        const nombreRecurso = recursoSelect.options[recursoSelect.selectedIndex].textContent.trim();
+        const response = await fetch(`{% url 'get_estantes_por_congelador' %}?congelador=${encodeURIComponent(nombreRecurso)}`);
+        const data = await response.json();
+        data.estantes.forEach(estante => { estanteSelect.innerHTML += `<option value="${estante.id}">${estante.numero}</option>`; });
+      } catch (error) { console.error('Error cargando estantes:', error); }
+    });
+
+    estanteSelect.addEventListener('change', async function() {
+      updateStructureUi();
+      if (!this.value) return;
+      try {
+        const response = await fetch(`{% url 'get_racks_por_estante' %}?estante_id=${this.value}`);
+        const data = await response.json();
+        data.racks.forEach(rack => { rackSelect.innerHTML += `<option value="${rack.id}">${rack.numero}</option>`; });
+      } catch (error) { console.error('Error cargando racks:', error); }
+    });
+
+    rackSelect.addEventListener('change', async function() {
+      resetGrid('');
+      resetSelect(cajaSelect, '-- Seleccionar caja --');
+      if (resourceIsSimple()) resetSelect(bandejaSelect, '-- No aplica para este recurso --');
+      else resetSelect(bandejaSelect, '-- Seleccionar bandeja --');
+      if (!this.value) return;
+      try {
+        if (resourceIsSimple()) {
+          const response = await fetch(`{% url 'get_cajas_por_rack' %}?rack_id=${this.value}`);
+          const data = await response.json();
+          data.cajas.forEach(caja => { cajaSelect.innerHTML += `<option value="${caja.id}">${caja.numero}</option>`; });
+          return;
+        }
+        const response = await fetch(`{% url 'get_bandejas_por_rack' %}?rack_id=${this.value}`);
+        const data = await response.json();
+        data.bandejas.forEach(bandeja => { bandejaSelect.innerHTML += `<option value="${bandeja.id}">${bandeja.numero}</option>`; });
+      } catch (error) { console.error('Error cargando bandejas/cajas:', error); }
+    });
+
+    bandejaSelect.addEventListener('change', async function() {
+      resetGrid('');
+      resetSelect(cajaSelect, '-- Seleccionar caja --');
+      if (!this.value) return;
+      try {
+        const response = await fetch(`{% url 'get_cajas_por_bandeja' %}?bandeja_id=${this.value}`);
+        const data = await response.json();
+        data.cajas.forEach(caja => { cajaSelect.innerHTML += `<option value="${caja.id}">${caja.numero}</option>`; });
+      } catch (error) { console.error('Error cargando cajas:', error); }
+    });
+
+    cajaSelect.addEventListener('change', async function() {
+      resetGrid('');
+      if (!this.value) return;
+      try {
+        const response = await fetch(`{% url 'get_subposiciones_por_caja_tree' %}?caja_id=${this.value}`);
+        const data = await response.json();
+        currentSubpositions = data.subposiciones || [];
+        renderGrid(currentSubpositions);
+      } catch (error) {
+        console.error('Error cargando subposiciones:', error);
+        gridRoot.innerHTML = '<div class="location-empty">Error al cargar las subposiciones libres.</div>';
+        gridShell.hidden = false;
+      }
+    });
+
+    updateStructureUi();
+  }
+
+  function resetAliquotCardState(card) {
+    card.querySelectorAll('input, select, textarea').forEach((field) => {
+      if (field.name && (field.name.endsWith('-DELETE') || field.name.endsWith('-material'))) return;
+      if (field.type === 'hidden') {
+        field.value = '';
+        return;
+      }
+      if (field.tagName === 'SELECT') {
+        field.selectedIndex = 0;
+        return;
+      }
+      if (field.type === 'checkbox' || field.type === 'radio') {
+        field.checked = false;
+        return;
+      }
+      field.value = '';
+    });
+    delete card.dataset.selectedCajaId;
+    if (typeof card.resetLocationState === 'function') {
+      card.resetLocationState();
+    }
+  }
+
+  function initAliquotCard(card) {
+    if (card.dataset.bound === 'true') {
+      syncSharedFields(card);
+      setMaterialForRow(card, card.querySelector('input[name$="-material"]')?.value || card.dataset.materialId || '');
+      return;
+    }
+    card.dataset.bound = 'true';
+    const deleteInput = card.querySelector('input[name$="-DELETE"]');
+    const removeButton = card.querySelector('.aliquot-remove');
+    if (removeButton) {
+      removeButton.addEventListener('click', () => {
+        if (deleteInput) deleteInput.checked = true;
+        resetAliquotCardState(card);
+        card.hidden = true;
+        updateAliquotNumbers();
+        refreshAllLocationGrids();
+      });
+    }
+    syncSharedFields(card);
+    setMaterialForRow(card, card.querySelector('input[name$="-material"]')?.value || card.dataset.materialId || '');
+    initLocationCard(card);
+  }
+
+  function createAliquotCard(materialId) {
+    const formIndex = Number(totalFormsInput.value);
+    const html = emptyTemplate.innerHTML.replace(/__prefix__/g, formIndex);
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = html.trim();
+    const card = wrapper.firstElementChild;
+    totalFormsInput.value = formIndex + 1;
+    setMaterialForRow(card, materialId);
+    syncSharedFields(card);
+    initAliquotCard(card);
+    updateAliquotNumbers();
+    return card;
+  }
+
+  function visibleCardsInBlock(block) {
+    return Array.from(block.querySelectorAll('.aliquot-entry')).filter(card => !card.hidden);
+  }
+
+  function ensureBlockQuantity(block, quantity) {
+    const rowsContainer = block.querySelector('[data-role="block-rows"]');
+    const materialId = block.querySelector('[data-role="block-material"]').value;
+    const currentVisible = visibleCardsInBlock(block);
+
+    if (currentVisible.length < quantity) {
+      const hiddenCards = Array.from(block.querySelectorAll('.aliquot-entry')).filter(card => card.hidden);
+      for (const card of hiddenCards) {
+        if (visibleCardsInBlock(block).length >= quantity) break;
+        const deleteInput = card.querySelector('input[name$="-DELETE"]');
+        if (deleteInput) deleteInput.checked = false;
+        resetAliquotCardState(card);
+        card.hidden = false;
+        setMaterialForRow(card, materialId);
+        syncSharedFields(card);
+      }
+      while (visibleCardsInBlock(block).length < quantity) {
+        rowsContainer.appendChild(createAliquotCard(materialId));
+      }
+    } else if (currentVisible.length > quantity) {
+      currentVisible.slice(quantity).forEach((card) => {
+        const deleteInput = card.querySelector('input[name$="-DELETE"]');
+        if (deleteInput) deleteInput.checked = true;
+        resetAliquotCardState(card);
+        card.hidden = true;
+      });
+    }
+    updateAliquotNumbers();
+    refreshAllLocationGrids();
+  }
+
+  function bindBlock(block) {
+    const materialSelect = block.querySelector('[data-role="block-material"]');
+    const quantityInput = block.querySelector('[data-role="block-quantity"]');
+    const removeButton = block.querySelector('[data-role="remove-block"]');
+
+    materialSelect.addEventListener('change', function() {
+      block.querySelectorAll('.aliquot-entry').forEach((card) => {
+        setMaterialForRow(card, this.value);
+      });
+      ensureBlockQuantity(block, Math.max(1, Number(quantityInput.value) || 1));
+    });
+
+    quantityInput.addEventListener('input', function() {
+      const normalized = Math.max(1, Number(this.value) || 1);
+      if (String(normalized) !== this.value) {
+        this.value = normalized;
+      }
+      ensureBlockQuantity(block, normalized);
+    });
+
+    quantityInput.addEventListener('change', function() {
+      ensureBlockQuantity(block, Math.max(1, Number(quantityInput.value) || 1));
+    });
+
+    removeButton.addEventListener('click', function() {
+      block.querySelectorAll('.aliquot-entry').forEach((card) => {
+        const deleteInput = card.querySelector('input[name$="-DELETE"]');
+        if (deleteInput) deleteInput.checked = true;
+        resetAliquotCardState(card);
+        card.hidden = true;
+      });
+      block.hidden = true;
+      updateAliquotNumbers();
+      refreshAllLocationGrids();
+    });
+  }
+
+  function createBlock(materialId = '', rowCards = []) {
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = blockTemplate.innerHTML.trim();
+    const block = wrapper.firstElementChild;
+    const rowsContainer = block.querySelector('[data-role="block-rows"]');
+    const materialSelect = block.querySelector('[data-role="block-material"]');
+    const quantityInput = block.querySelector('[data-role="block-quantity"]');
+    materialSelect.value = materialId || '';
+    rowCards.forEach((card) => {
+      rowsContainer.appendChild(card);
+      setMaterialForRow(card, materialId);
+      syncSharedFields(card);
+      initAliquotCard(card);
+    });
+    quantityInput.value = Math.max(rowCards.filter(card => !card.hidden).length, 1);
+    bindBlock(block);
+    blockList.appendChild(block);
+    if (!rowCards.length) ensureBlockQuantity(block, 1);
+    return block;
+  }
+
+  function initializeBlocksFromServerRows() {
+    const serverCards = Array.from(serverRowPool.querySelectorAll('.aliquot-entry'));
+    const activeServerCards = serverCards.filter((card) => !card.hidden);
+    if (!activeServerCards.length) {
+      createBlock('');
+      return;
+    }
+    const grouped = new Map();
+    activeServerCards.forEach((card) => {
+      const materialId = card.dataset.materialId || '';
+      if (!grouped.has(materialId)) grouped.set(materialId, []);
+      grouped.get(materialId).push(card);
+    });
+    grouped.forEach((cards, materialId) => createBlock(materialId, cards));
+  }
+
+  addBlockButton.addEventListener('click', function() {
+    createBlock('');
+  });
+
+  [sharedFechaExtraccion, sharedFechaLlegada, sharedCentro, sharedObservaciones].forEach((field) => {
+    if (!field) return;
+    field.addEventListener('input', function() {
+      document.querySelectorAll('.aliquot-entry').forEach(syncSharedFields);
+    });
+  });
+
+  initializeBlocksFromServerRows();
+  updateAliquotNumbers();
+</script>
+{% endblock %}

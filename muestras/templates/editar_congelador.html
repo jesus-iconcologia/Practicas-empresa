@@ -1,0 +1,174 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block title %}
+Editar recurso
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+<style>
+    .photo-field-card {
+        padding: 14px;
+        border: 1px solid #d9e3ef;
+        border-radius: 10px;
+        background: linear-gradient(180deg, #f8fbff 0%, #f2f7fc 100%);
+    }
+
+    .photo-current {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+        margin-bottom: 14px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid #d9e3ef;
+    }
+
+    .photo-preview {
+        width: 170px;
+        max-width: 100%;
+        border-radius: 10px;
+        border: 1px solid #cfd8e3;
+        background: #fff;
+        object-fit: cover;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .photo-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        color: #36506d;
+    }
+
+    .photo-chip {
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: #e8f0fe;
+        color: #1a3d7c;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .photo-upload-box {
+        padding: 12px 14px;
+        border-radius: 8px;
+        background: #fff;
+        border: 1px dashed #bfd0e4;
+    }
+
+    .photo-upload-box small {
+        display: block;
+        margin-top: 8px;
+        color: #5d7288;
+    }
+
+    .photo-empty {
+        margin-bottom: 14px;
+        padding: 12px 14px;
+        border-radius: 8px;
+        background: #fff;
+        border: 1px solid #d9e3ef;
+        color: #5d7288;
+    }
+
+    @media (max-width: 720px) {
+        .photo-current {
+            flex-direction: column;
+        }
+
+        .photo-preview {
+            width: 100%;
+            max-width: 260px;
+        }
+    }
+</style>
+
+<div class="form-container">
+    <div class="acciones-estudios">
+        <a href="/archivo/detalles_congelador/{{ congelador.congelador }}" class="accion-btn accion-secundaria">
+            Volver a gestionar
+        </a>
+    </div>
+
+    <div class="form-header">
+        <h1>Editar recurso {{ congelador.congelador }}</h1>
+        <p class="form-subtitle">
+            Modifique los datos técnicos y la información del recurso.
+        </p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="styled-form">
+        {% csrf_token %}
+
+        <div class="form-card">
+            <h2>Datos del recurso</h2>
+
+            {% for field in form %}
+                <div class="form-field">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                        {% if field.field.required %}
+                            <span class="required">*</span>
+                        {% endif %}
+                    </label>
+
+                    {% if field.name == 'fotografia' %}
+                        <div class="photo-field-card">
+                            {% if congelador.fotografia %}
+                                <div class="photo-current">
+                                    <img src="{{ congelador.fotografia.url }}" alt="Fotografía actual del recurso {{ congelador.congelador }}" class="photo-preview">
+                                    <div class="photo-meta">
+                                        <span class="photo-chip">Imagen actual</span>
+                                        <strong>{{ congelador.fotografia.name|cut:"congeladores/" }}</strong>
+                                        <span>Puede mantener esta fotografía o subir una nueva para reemplazarla.</span>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="photo-empty">
+                                    <strong>Sin fotografía actual.</strong> Puede subir una imagen para identificar mejor el recurso.
+                                </div>
+                            {% endif %}
+                            <div class="photo-upload-box">
+                                {{ field }}
+                                <small>
+                                    {% if congelador.fotografia %}
+                                        Seleccione un archivo solo si desea cambiar la imagen actual.
+                                    {% else %}
+                                        Añada una imagen del recurso para identificarlo más fácilmente.
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                    {% else %}
+                        {{ field }}
+                    {% endif %}
+
+                    {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+
+                    {% if field.errors %}
+                        <div class="error-text">
+                            {{ field.errors|striptags }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="accion-btn accion-primaria">
+                Guardar cambios
+            </button>
+
+            <a href="/archivo/detalles_congelador/{{ congelador.congelador }}" class="accion-btn accion-secundaria">
+                Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

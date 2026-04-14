@@ -1,0 +1,1266 @@
+﻿{% extends "master.html" %}
+
+{% block title %}
+Lista de Muestras
+{% endblock %}
+{% load static %}
+{% block content %}
+<!-- Página que muestra todas las muestras almacenadas con opciones de filtrado y acciones masivas -->
+<link rel ="stylesheet" href="{% static 'css/muestras_todas.css' %}">
+
+<style>
+  button[disabled] {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+  }
+  .btn.disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+  }
+  
+  .accion-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .action-row {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  /* Estilos para multiselect dropdown */
+  .multiselect-wrapper {
+    position: relative;
+    width: 100%;
+  }
+  .multiselect-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    min-height: 32px;
+    user-select: none;
+  }
+  .multiselect-toggle:hover {
+    border-color: #999;
+  }
+  .multiselect-toggle .arrow {
+    margin-left: 8px;
+    font-size: 10px;
+  }
+  .multiselect-dropdown {
+    display: none;
+    position: absolute;
+    z-index: 1000;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    max-height: 180px;
+    overflow-y: auto;
+    width: 100%;
+    min-width: 180px;
+  }
+  .multiselect-wrapper.open .multiselect-dropdown {
+    display: block;
+  }
+  .multiselect-dropdown label {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 12px;
+    gap: 5px;
+    line-height: 1.2;
+  }
+  .multiselect-dropdown label:hover {
+    background: #f0f4ff;
+  }
+  .multiselect-dropdown input[type="checkbox"] {
+    margin: 0;
+    width: 14px;
+    height: 14px;
+    min-width: 14px;
+    min-height: 14px;
+    transform: none;
+    flex: 0 0 14px;
+  }
+  .multiselect-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    flex: 1;
+  }
+  .multiselect-tag {
+    background: #e0e7ff;
+    color: #1a3d7c;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .multiselect-tag-remove {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 1;
+    color: #1a3d7c;
+  }
+  .multiselect-tag-remove:hover {
+    color: #c00;
+  }
+  .multiselect-placeholder {
+    color: #999;
+  }
+  .filter-help {
+    display: block;
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 4px;
+  }
+
+  .filter-panel {
+    padding: 14px 0 6px;
+  }
+
+  .filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 18px 22px;
+    margin-bottom: 14px;
+  }
+
+  .filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .filter-field label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a3d7c;
+    line-height: 1.25;
+  }
+
+  .filter-row {
+    grid-column: 1 / -1;
+    width: 100%;
+    height: 0;
+  }
+
+  .filter-field input[type="text"],
+  .filter-field input[type="date"],
+  .filter-field .multiselect-toggle {
+    width: 100%;
+    height: 40px;
+    min-height: 40px;
+    padding: 8px 12px;
+    border: 1px solid #cfd8e3;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 14px;
+    background: #fff;
+  }
+
+  .filter-field .multiselect-toggle .multiselect-tags {
+    min-height: 20px;
+    align-items: center;
+  }
+
+  .filter-field .multiselect-toggle .arrow {
+    flex-shrink: 0;
+  }
+
+  .filter-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+</style>
+
+
+{% load muestras_filters %}
+<div class="collapsible" style="border-radius: 8px; overflow: hidden;">
+    <button class="collapsible-header">🔍 Filtros</button>
+    <div class="collapsible-content">
+<div class="filter-panel" style="border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+    <form action="" id="filter-form">
+        <div class="filter-grid">
+
+            <!-- GRUPO 1: Identificacion basica -->
+            <div class="filter-field">
+                <label>Id del individuo</label>
+                <input type="text" name="id_individuo">
+                <small class="filter-help">Puedes filtrar por lista de IDs separados por ';'</small>
+            </div>
+            <div class="filter-field">
+                <label>ID muestra</label>
+                <input type="text" name="nom_lab">
+                <small class="filter-help">Puedes filtrar por lista de IDs separados por ';'</small>
+            </div>
+            <div class="filter-field">
+                <label>Material</label>
+                <div class="multiselect-wrapper" data-name="id_material">
+                  <input type="hidden" name="id_material" value="">
+                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">▼</span></div>
+                  <div class="multiselect-dropdown">
+                    <label><input type="checkbox" value="null"> Sin asignar</label>
+                    {% for material in opciones_materiales %}
+                      <label><input type="checkbox" value="{{ material }}"> {{ material }}</label>
+                    {% endfor %}
+                  </div>
+                </div>
+            </div>
+            <div class="filter-field">
+                <label>Estudio</label>
+                <div class="multiselect-wrapper" data-name="estudio">
+                  <input type="hidden" name="estudio" value="">
+                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">▼</span></div>
+                  <div class="multiselect-dropdown">
+                    <label><input type="checkbox" value="null"> Sin estudio asignado</label>
+                    {% for estudio in opciones_estudios %}
+                      <label><input type="checkbox" value="{{ estudio.id }}"> {{ estudio.nombre_estudio }}</label>
+                    {% endfor %}
+                  </div>
+                </div>
+            </div>
+
+            <div class="filter-row"></div>
+
+            <!-- GRUPO 2: Cantidades -->
+            <div class="filter-field">
+                <label>Volumen actual</label>
+                <input type="text" name="volumen_actual">
+            </div>
+            <div class="filter-field">
+                <label>Unidad de volumen</label>
+                <input type="text" name="unidad_volumen">
+            </div>
+            <div class="filter-field">
+                <label>Concentracion actual</label>
+                <input type="text" name="concentracion_actual">
+            </div>
+            <div class="filter-field">
+                <label>Unidad de concentracion</label>
+                <input type="text" name="unidad_concentracion">
+            </div>
+            <div class="filter-field">
+                <label>Masa actual</label>
+                <input type="text" name="masa_actual">
+            </div>
+            <div class="filter-field">
+                <label>Unidad de masa</label>
+                <input type="text" name="unidad_masa">
+            </div>
+
+            <div class="filter-row"></div>
+
+            <!-- GRUPO 3: Fechas -->
+            <div class="filter-field">
+                <label>Fecha de extraccion</label>
+                <input type="date" name="fecha_extraccion">
+            </div>
+            <div class="filter-field">
+                <label>Fecha de llegada</label>
+                <input type="date" name="fecha_llegada">
+            </div>
+
+            <div class="filter-row"></div>
+
+            <!-- GRUPO 4: Procedencia y Estado -->
+            <div class="filter-field">
+                <label>Centro procedencia</label>
+                <div class="multiselect-wrapper" data-name="centro_procedencia">
+                  <input type="hidden" name="centro_procedencia" value="">
+                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">▼</span></div>
+                  <div class="multiselect-dropdown">
+                    <label><input type="checkbox" value="null"> Sin asignar</label>
+                    {% for centro in opciones_centros %}
+                      <label><input type="checkbox" value="{{ centro }}"> {{ centro }}</label>
+                    {% endfor %}
+                  </div>
+                </div>
+            </div>
+            <div class="filter-field">
+                <label>Estado actual</label>
+                <div class="multiselect-wrapper" data-name="estado_actual">
+                  <input type="hidden" name="estado_actual" value="">
+                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">▼</span></div>
+                  <div class="multiselect-dropdown">
+                    <label><input type="checkbox" value="null"> Sin asignar</label>
+                    <label><input type="checkbox" value="DISP"> Disponible</label>
+                    <label><input type="checkbox" value="PENV"> Parcialmente enviada</label>
+                    <label><input type="checkbox" value="ENV"> Enviada</label>
+                    <label><input type="checkbox" value="DEST"> Destruida</label>
+                  </div>
+                </div>
+            </div>
+
+            <div class="filter-row"></div>
+
+            <!-- GRUPO 5: Localizacion -->
+            <div class="filter-field">
+                <label>Congelador</label>
+                <div class="multiselect-wrapper" data-name="congelador">
+                  <input type="hidden" name="congelador" value="">
+                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">▼</span></div>
+                  <div class="multiselect-dropdown">
+                    <label><input type="checkbox" value="null"> Sin asignar</label>
+                    {% for congelador in opciones_congeladores %}
+                      <label><input type="checkbox" value="{{ congelador }}"> {{ congelador }}</label>
+                    {% endfor %}
+                  </div>
+                </div>
+            </div>
+            <div class="filter-field">
+                <label>Estante</label>
+                <div class="multiselect-wrapper" data-name="estante">
+                  <input type="hidden" name="estante" value="">
+                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">▼</span></div>
+                  <div class="multiselect-dropdown">
+                    <label><input type="checkbox" value="null"> Sin asignar</label>
+                    {% for estante in opciones_estantes %}
+                      <label><input type="checkbox" value="{{ estante }}"> {{ estante }}</label>
+                    {% endfor %}
+                  </div>
+                </div>
+            </div>
+            <div class="filter-field">
+                <label>Cajón</label>
+                <div class="multiselect-wrapper" data-name="cajon">
+                  <input type="hidden" name="cajon" value="">
+                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">▼</span></div>
+                  <div class="multiselect-dropdown">
+                    <label><input type="checkbox" value="null"> Sin asignar</label>
+                    {% for cajon in opciones_cajones %}
+                      <label><input type="checkbox" value="{{ cajon }}"> {{ cajon }}</label>
+                    {% endfor %}
+                  </div>
+                </div>
+            </div>
+            <div class="filter-field">
+                <label>Rack</label>
+                <div class="multiselect-wrapper" data-name="rack">
+                  <input type="hidden" name="rack" value="">
+                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">▼</span></div>
+                  <div class="multiselect-dropdown">
+                    <label><input type="checkbox" value="null"> Sin asignar</label>
+                    {% for rack in opciones_racks %}
+                      <label><input type="checkbox" value="{{ rack }}"> {{ rack }}</label>
+                    {% endfor %}
+                  </div>
+                </div>
+            </div>
+            <div class="filter-field">
+                <label>Caja</label>
+                <div class="multiselect-wrapper" data-name="caja">
+                  <input type="hidden" name="caja" value="">
+                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">▼</span></div>
+                  <div class="multiselect-dropdown">
+                    <label><input type="checkbox" value="null"> Sin asignar</label>
+                    {% for caja in opciones_cajas %}
+                      <label><input type="checkbox" value="{{ caja }}"> {{ caja }}</label>
+                    {% endfor %}
+                  </div>
+                </div>
+            </div>
+
+            <div class="filter-row"></div>
+
+            <!-- GRUPO 6: Observaciones -->
+            <div class="filter-field" style="width:100%;">
+                <label>Observaciones</label>
+                <input type="text" name="observaciones">
+            </div>
+
+        </div>
+
+        <div class="filter-buttons">
+            <button type="submit" class="btn btn-primary">
+                🔎 Filtrar
+            </button>
+            <a href="/muestras" class="btn btn-secondary">
+                ✖ Eliminar filtros
+            </a>
+        </div>
+    </form>
+</div>
+</div>
+</div>
+
+
+<div class="collapsible" style="border-radius: 8px; overflow: hidden; margin-top: 15px;">
+    <button class="collapsible-header">⚙️ Acciones</button>
+    <div class="collapsible-content">
+ <div class="action-buttons" style="border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+   <div class="action-row">
+   {% if perms.muestras.can_add_muestras_web %}
+    <a href="/muestras/nueva" class="btn">
+      ➕🧪 Añadir muestras
+    </a>
+      <a href="/muestras/upload_excel" class="btn">
+        📤📄 Importar muestras
+      </a>
+
+    {% endif %}
+            {% if perms.muestras.can_change_estudios_web %}
+    <button type="button"
+            onclick="accionEstudio()"
+            class="btn btn-success"
+            id="estudio-btn">
+      🧬 Añadir al estudio
+    </button>
+    {%endif%}
+    {% if perms.muestras.can_change_muestras_web %}
+    <button type="submit" form="acciones-form" name="envio" value="true" class="btn btn-success" id='envio-btn'>📦 Registrar envío</button>
+    <button type="submit" form="acciones-form" name="cambio_posicion" value="true" class="btn btn-success" id='cambio_posicion-btn'>🔄 Cambio de posición</button>
+{%endif%}
+   </div>
+
+    <div class="action-row">
+    <form action="" method="GET" style="display:inline;" id="exportar-form">
+        {% for key, value in request.GET.items %}
+            {% if key != 'exportar_excel' %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endif %}
+        {% endfor %}
+        <button name="exportar_excel" value="exportar_excel" type="button" class="btn btn-success" onclick="exportarMuestras()">
+          📊⬇ Exportar muestras
+        </button>
+        <input type="hidden" name="exportar_excel" value="exportar_excel" id="exportar-hidden">
+    </form>
+    <button type="button" id="exportar-seleccionadas-btn" class="btn btn-success" disabled onclick="exportarSeleccionadas()">
+      📊✅ Exportar muestras seleccionadas
+    </button>
+    </div>
+
+    <div class="action-row">
+      {% if perms.muestras.can_delete_muestras_web %}
+      <button type="button" onclick="validarSeleccion('eliminar', '¿Quieres eliminar las muestras seleccionadas?')" class="btn btn-danger" id='eliminar-btn' disabled>🗑️ Eliminar seleccionadas</button>
+      {%endif%}
+      {% if perms.muestras.can_change_muestras_web %}
+      <button type="submit" form="acciones-form" name="destruir" value="true" class="btn btn-danger" id='destruir-btn' disabled>🔥 Destruir muestra</button>
+      {%endif%}
+    </div>
+
+    <div class="action-row">
+    <input type="button" value="☑️ Seleccionar todo" onclick="seleccionar_todo(true)" class="btn btn-secondary">
+    <input type="button" value="☐ Deseleccionar" onclick="seleccionar_todo(false)" class="btn btn-secondary">
+    </div>
+
+    <!-- Banner para selección global -->
+    <div id="seleccion-global-banner" style="display:none; width:100%; padding: 10px 15px; background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 6px; color: #0c5460; font-size: 14px;">
+      <span id="banner-texto">Has seleccionado <strong id="seleccion-pagina-count"></strong> muestras de esta página.</span>
+      <a href="#" id="seleccionar-todas-global" style="font-weight: 600; margin-left: 8px;">Seleccionar las {{ contador_muestras }} muestras que coinciden con la búsqueda</a>
+      <span id="banner-global-activo" style="display:none;">Se han seleccionado las <strong>{{ contador_muestras }}</strong> muestras. <a href="#" id="cancelar-seleccion-global" style="font-weight: 600; margin-left: 8px;">Cancelar</a></span>
+    </div>
+ </div>
+ 
+</div>
+</div>
+
+<form action="{% url 'acciones_post' %}" method="post" id="acciones-form" novalidate>
+  {%csrf_token%}
+  <!-- Botones ocultos para acciones -->
+  <button type="submit" value="true" name="estudio" style="display:none;"></button>
+  <button type="submit" value="true" name="eliminar" style="display:none;"></button>
+  <button type="submit" value="true" name="destruir" style="display:none;"></button>
+  <button type="submit" value="true" name="envio" style="display:none;"></button>
+  <button type="submit" value="true" name="cambio_posicion" style="display:none;"></button>
+  <button type="submit" value="true" name="exportar_seleccionadas" style="display:none;"></button>
+
+<!--
+<form action="" method="GET" style="display:inline;">
+    {% for key, value in request.GET.items %}
+        {% if key != 'crear_pdf' %}
+            <input type="hidden" name="{{ key }}" value="{{ value }}">
+        {% endif %}
+    {% endfor %}
+    <input name="crear_pdf" type="submit" class="btn btn-success" value="Crear PDF de la búsqueda">
+</form>
+-->
+
+<div id="muestras-ids" data-ids='{{ muestras_ids_json|escapejs }}'></div>
+
+<div class="table-container">
+
+  <!-- Buscador global (server-side, sin form anidado) -->
+  <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+      <label for="busqueda-input" style="font-weight: 500; color: #333;">Buscar:</label>
+      <input type="text" id="busqueda-input" value="{{ busqueda|default:'' }}" placeholder="Escribe para buscar en todas las muestras..." style="padding: 8px 12px; border: 1px solid #dfe3e6; border-radius: 6px; font-size: 14px; width: 300px;">
+      <button type="button" onclick="ejecutarBusqueda()" class="btn btn-secondary" style="padding: 8px 14px;">🔍 Buscar</button>
+      {% if busqueda %}
+        <button type="button" onclick="limpiarBusqueda()" class="btn btn-secondary" style="padding: 8px 14px;">✖ Limpiar búsqueda</button>
+      {% endif %}
+  </div>
+
+
+
+  <table class="styled-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th class="wrap-text">ID Individuo</th>
+        <th>ID muestra</th>
+        <th>Localizacion</th>
+        <th>Material</th>
+        <th class="wrap-text">Estado actual</th>
+        <th>Estudio</th>
+        <th class="wrap-text">Historial localizaciones</th>
+        <th class="wrap-text">Historial estudios</th>
+        <th class="wrap-text">Historial envíos</th>
+        <th class="wrap-text">Historial destruccion</th>
+      </tr>
+    </thead>
+ 
+  <tbody>
+    {% for x in muestras_page %}
+      <tr class="{% if x.estado_actual == 'DISP' %}status-available{% elif x.estado_actual == 'PENV' %}status-processing{% elif x.estado_actual == 'DEST' %}status-destroyed{% else %}status-enviada{% endif %}">
+      <td>
+        <input type="checkbox" name="muestra_id" value ="{{x.id}}" class="form-control" onchange="actualizarEstadoBotones()">
+        <a href="{% url 'detalles_muestra' x.nom_lab %}" class="chip-detalle" title="Documentacion" style="padding: 2px 5px; margin-left: 5px;">ℹ️</a>
+        <a href="/muestras/detalles_muestra/{{x.nom_lab}}/editar" class="chip-detalle" title="Editar" style="padding: 2px 5px; margin-left: 2px;">✏️</a>
+      </td>
+      <td class="wrap-text">{{ x.id_individuo|default_if_none:"" }}</td>
+      <td>{{ x.nom_lab }}</td>
+      {% if x.posicion_completa %}
+      <td>{{x.posicion_completa}}</td>
+      {% else %}
+      <td>Sin asignar</td>
+      {% endif %}
+      <td>
+      {% if x.id_material != None %}
+        {{ x.id_material }}
+      {%endif%}
+      </td>
+      <td class="wrap-text" data-estado="{{ x.estado_actual }}">
+        {% if x.estado_actual %}
+          {{ x.estado_actual }}
+        {% endif %}
+      </td>
+      <td>
+      {% if x.estudio != None %}
+        {{ x.estudio.nombre_estudio }}
+      {% else %}
+        -
+      {% endif %}
+    </td>
+    <td class="wrap-text">
+      <a href="{%url 'historial_localizaciones' x.id %}">Ver</a>
+    </td>
+    <td class="wrap-text">
+      <a href="{%url 'historial_estudios' x.id %}">Ver</a>
+    </td>
+    <td class="wrap-text">{% if x.envio.exists %}
+      <a href="{% url 'historial_envios' x.id %}">Ver envíos</a>
+      {%else%}
+      -
+      {% endif %}
+    </td>
+    <td class="wrap-text">
+      {% if x.estado_actual == 'DEST' %}
+        <a href="{% url 'historial_destruccion' x.id %}">Ver</a>
+      {% else %}
+        -
+      {% endif %}
+    </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+</form>
+<!-- CONTROLES DE PAGINACIÓN -->
+<div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+  <!-- Selector de items por página -->
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <label for="items-por-pagina" style="font-weight: 600; color: #333;">Items por página:</label>
+    <form method="GET" style="display: inline; margin: 0;">
+      {% for key, value in request.GET.items %}
+        {% if key != 'items_por_pagina' and key != 'page' %}
+          <input type="hidden" name="{{ key }}" value="{{ value }}">
+        {% endif %}
+      {% endfor %}
+      <select name="items_por_pagina" id="items-por-pagina" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" onchange="this.form.submit();">
+        <option value="10" {% if items_por_pagina == 10 %}selected{% endif %}>10</option>
+        <option value="25" {% if items_por_pagina == 25 %}selected{% endif %}>25</option>
+        <option value="50" {% if items_por_pagina == 50 %}selected{% endif %}>50</option>
+        <option value="100" {% if items_por_pagina == 100 %}selected{% endif %}>100</option>
+        <option value="todas" {% if items_por_pagina == 'todas' %}selected{% endif %}>Todas</option>
+      </select>
+    </form>
+  </div>
+
+  <!-- Información de página actual -->
+  <div style="font-weight: 600; color: #333;">
+    Página {{ muestras_page.number }} de {{ paginator.num_pages }} | Total: {{ contador_muestras }} muestra{{ contador_muestras|pluralize }}
+  </div>
+
+  <!-- Controles de navegación -->
+  <div style="display: flex; gap: 8px; align-items: center;">
+    {% if muestras_page.has_previous %}
+      <a href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+         class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;">« Primera</a>
+      <a href="?page={{ muestras_page.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+         class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;">‹ Anterior</a>
+    {% else %}
+      <button class="btn btn-secondary" disabled style="padding: 8px 12px; font-size: 12px; opacity: 0.5;">« Primera</button>
+      <button class="btn btn-secondary" disabled style="padding: 8px 12px; font-size: 12px; opacity: 0.5;">‹ Anterior</button>
+    {% endif %}
+
+    <!-- Números de página -->
+    <div style="display: flex; gap: 4px; align-items: center;">
+      {% for num in paginator.page_range %}
+        {% if num == muestras_page.number %}
+          <span style="padding: 6px 10px; background: #1a3d7c; color: white; border-radius: 4px; font-weight: 600;">{{ num }}</span>
+        {% elif num > muestras_page.number|add:'-3' and num < muestras_page.number|add:'3' %}
+          <a href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+             style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #1a3d7c; background: white;">{{ num }}</a>
+        {% elif num == 1 or num == paginator.num_pages %}
+          <a href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+             style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #1a3d7c; background: white;">{{ num }}</a>
+        {% elif num == muestras_page.number|add:'-3' or num == muestras_page.number|add:'3' %}
+          <span style="padding: 0 4px;">...</span>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    {% if muestras_page.has_next %}
+      <a href="?page={{ muestras_page.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+         class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;">Siguiente ›</a>
+      <a href="?page={{ paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+         class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;">Última »</a>
+    {% else %}
+      <button class="btn btn-secondary" disabled style="padding: 8px 12px; font-size: 12px; opacity: 0.5;">Siguiente ›</button>
+      <button class="btn btn-secondary" disabled style="padding: 8px 12px; font-size: 12px; opacity: 0.5;">Última »</button>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  // IDs de todas las muestras filtradas (para selección global)
+  var todasMuestrasIds = [];
+  try {
+    var elIds = document.getElementById('muestras-ids');
+    if (elIds && elIds.dataset.ids) {
+      todasMuestrasIds = JSON.parse(elIds.dataset.ids);
+    }
+  } catch (e) {
+    todasMuestrasIds = [];
+  }
+  var seleccionGlobalActiva = false;
+
+      function seleccionar_todo(valor) {
+        checkboxes = document.getElementsByTagName('input');
+        for (var i=0; i<checkboxes.length; i++) {
+          if (checkboxes[i].type == 'checkbox' && checkboxes[i].name == 'muestra_id')
+            checkboxes[i].checked = valor;
+        }
+        if (!valor) {
+          cancelarSeleccionGlobal();
+        } else {
+          var checkboxesVisibles = document.querySelectorAll('input[type="checkbox"][name="muestra_id"]');
+          if (todasMuestrasIds.length > checkboxesVisibles.length) {
+            document.getElementById('seleccion-global-banner').style.display = 'block';
+            document.getElementById('seleccion-pagina-count').textContent = checkboxesVisibles.length;
+            document.getElementById('banner-texto').style.display = '';
+            document.getElementById('seleccionar-todas-global').style.display = '';
+            document.getElementById('banner-global-activo').style.display = 'none';
+          }
+        }
+        actualizarEstadoBotones();
+      }
+
+      function activarSeleccionGlobal() {
+        seleccionGlobalActiva = true;
+        var form = document.getElementById('acciones-form');
+        var idsVisibles = new Set();
+        document.querySelectorAll('input[type="checkbox"][name="muestra_id"]').forEach(function(cb) {
+          idsVisibles.add(parseInt(cb.value));
+          cb.checked = true;
+        });
+        todasMuestrasIds.forEach(function(id) {
+          if (!idsVisibles.has(id)) {
+            var hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'muestra_id';
+            hidden.value = id;
+            hidden.classList.add('global-hidden-muestra');
+            form.appendChild(hidden);
+          }
+        });
+        document.getElementById('banner-texto').style.display = 'none';
+        document.getElementById('seleccionar-todas-global').style.display = 'none';
+        document.getElementById('banner-global-activo').style.display = '';
+        actualizarEstadoBotones();
+      }
+
+      function cancelarSeleccionGlobal() {
+        seleccionGlobalActiva = false;
+        document.querySelectorAll('.global-hidden-muestra').forEach(function(el) {
+          el.remove();
+        });
+        document.getElementById('seleccion-global-banner').style.display = 'none';
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        var btnGlobal = document.getElementById('seleccionar-todas-global');
+        if (btnGlobal) {
+          btnGlobal.addEventListener('click', function(e) {
+            e.preventDefault();
+            activarSeleccionGlobal();
+          });
+        }
+        var btnCancelar = document.getElementById('cancelar-seleccion-global');
+        if (btnCancelar) {
+          btnCancelar.addEventListener('click', function(e) {
+            e.preventDefault();
+            cancelarSeleccionGlobal();
+            seleccionar_todo(false);
+          });
+        }
+      });
+    </script>
+
+<script>
+// ----- MULTISELECT DROPDOWNS -----
+document.addEventListener('DOMContentLoaded', function() {
+  var params = new URLSearchParams(window.location.search);
+
+  // Restaurar valores de inputs de texto y fecha
+  var filterForm = document.getElementById('filter-form');
+  if (filterForm) {
+    filterForm.querySelectorAll('input[type="text"], input[type="date"]').forEach(function(input) {
+      var val = params.get(input.name);
+      if (val) input.value = val;
+    });
+  }
+
+  document.querySelectorAll('.multiselect-wrapper').forEach(function(wrapper) {
+    var name = wrapper.getAttribute('data-name');
+    var toggle = wrapper.querySelector('.multiselect-toggle');
+    var dropdown = wrapper.querySelector('.multiselect-dropdown');
+    var hiddenInput = wrapper.querySelector('input[type="hidden"]');
+    var tagsContainer = wrapper.querySelector('.multiselect-tags');
+    var checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
+
+    // Restaurar valores desde URL
+    var currentVal = params.get(name) || '';
+    if (currentVal) {
+      var vals = currentVal.split(';');
+      checkboxes.forEach(function(cb) {
+        if (vals.indexOf(cb.value) !== -1) cb.checked = true;
+      });
+      hiddenInput.value = currentVal;
+    }
+
+    function renderTags() {
+      var selected = [];
+      checkboxes.forEach(function(cb) {
+        if (cb.checked) selected.push({ value: cb.value, label: cb.parentElement.textContent.trim() });
+      });
+      tagsContainer.innerHTML = '';
+      if (selected.length === 0) {
+        tagsContainer.innerHTML = '<span class="multiselect-placeholder">Seleccionar...</span>';
+      } else {
+        selected.forEach(function(item) {
+          var tag = document.createElement('span');
+          tag.className = 'multiselect-tag';
+          tag.textContent = item.label;
+          var removeBtn = document.createElement('span');
+          removeBtn.className = 'multiselect-tag-remove';
+          removeBtn.textContent = '×';
+          removeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            checkboxes.forEach(function(cb) {
+              if (cb.value === item.value) cb.checked = false;
+            });
+            updateValue();
+          });
+          tag.appendChild(removeBtn);
+          tagsContainer.appendChild(tag);
+        });
+      }
+    }
+
+    function updateValue() {
+      var vals = [];
+      checkboxes.forEach(function(cb) {
+        if (cb.checked) vals.push(cb.value);
+      });
+      hiddenInput.value = vals.join(';');
+      renderTags();
+    }
+
+    // Toggle dropdown
+    toggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      // Close all other dropdowns
+      document.querySelectorAll('.multiselect-wrapper.open').forEach(function(other) {
+        if (other !== wrapper) other.classList.remove('open');
+      });
+      wrapper.classList.toggle('open');
+    });
+
+    // Checkbox change
+    checkboxes.forEach(function(cb) {
+      cb.addEventListener('change', function() {
+        updateValue();
+      });
+    });
+
+    // Render initial state
+    renderTags();
+  });
+
+  // Close dropdowns on outside click
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.multiselect-wrapper')) {
+      document.querySelectorAll('.multiselect-wrapper.open').forEach(function(w) {
+        w.classList.remove('open');
+      });
+    }
+  });
+});
+</script>
+
+<script>
+function validarSeleccion(botonName, mensaje) {
+  const checkboxes = document.querySelectorAll('input[type="checkbox"][name="muestra_id"]');
+  const hiddenGlobales = document.querySelectorAll('.global-hidden-muestra');
+  const haySeleccionados = Array.from(checkboxes).some(cb => cb.checked) || hiddenGlobales.length > 0;
+  
+  if (!haySeleccionados) {
+    alert('Por favor selecciona al menos una muestra');
+    return false;
+  }
+  
+  confirmarAccionApp({
+    title: botonName === 'eliminar' ? 'Eliminar muestras' : 'Confirmar accion',
+    message: mensaje,
+    confirmText: botonName === 'eliminar' ? 'Eliminar' : 'Continuar'
+  }).then(function(confirmado) {
+    if (!confirmado) return;
+    // Recoger datos del formulario y enviar por AJAX con progreso
+    const form = document.getElementById('acciones-form');
+    const formData = new FormData(form);
+    formData.append(botonName, 'true');
+    const titulos = {
+      'eliminar': 'Eliminando muestras',
+      'destruir': 'Destruyendo muestras'
+    };
+    accionConProgreso(form.action, formData, titulos[botonName] || 'Procesando');
+  });
+  return false;
+}
+
+function exportarSeleccionadas() {
+  mostrarProgreso('Exportando muestras seleccionadas');
+  document.getElementById('acciones-form').elements['exportar_seleccionadas'].click();
+  // Para descarga POST, cerrar el progreso después de un tiempo
+  setTimeout(function() { cerrarProgreso(true, '¡Exportación completada!'); }, 4000);
+}
+
+function exportarMuestras() {
+  const form = document.getElementById('exportar-form');
+  mostrarProgreso('Exportando muestras');
+  // Construir la URL con los params del form
+  const formData = new FormData(form);
+  const params = new URLSearchParams(formData).toString();
+  const url = form.action || window.location.pathname;
+  descargarConProgreso(url + '?' + params, 'Exportando muestras');
+}
+
+// Funciones de búsqueda global (sin form anidado)
+function ejecutarBusqueda() {
+  var texto = document.getElementById('busqueda-input').value.trim();
+  var params = new URLSearchParams(window.location.search);
+  if (texto) {
+    params.set('busqueda', texto);
+  } else {
+    params.delete('busqueda');
+  }
+  params.delete('page'); // volver a página 1 al buscar
+  window.location.href = window.location.pathname + '?' + params.toString();
+}
+
+function limpiarBusqueda() {
+  var params = new URLSearchParams(window.location.search);
+  params.delete('busqueda');
+  params.delete('page');
+  window.location.href = window.location.pathname + '?' + params.toString();
+}
+
+// Permitir buscar con Enter
+document.addEventListener('DOMContentLoaded', function() {
+  var input = document.getElementById('busqueda-input');
+  if (input) {
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        ejecutarBusqueda();
+      }
+    });
+  }
+});
+
+// LÓGICA DEL CANCELADOR/ACTUALIZADOR DE MUESTRAS
+function actualizarEstadoBotones() {
+
+  const checkboxes = document.querySelectorAll('input[type="checkbox"][name="muestra_id"]');
+  const seleccionados = Array.from(checkboxes).filter(cb => cb.checked);
+
+  // Botones
+  const btnEnvio  = document.getElementById('envio-btn');
+  const btnCambio = document.getElementById('cambio_posicion-btn');
+  const btnDestruir = document.getElementById('destruir-btn');
+  const btnEliminar = document.getElementById('eliminar-btn');
+  const btnEstudio  = document.getElementById('estudio-btn');
+  if (btnEstudio) {
+    btnEstudio.disabled = (seleccionados.length === 0);
+  }
+  const btnExportarSel = document.getElementById('exportar-seleccionadas-btn');
+
+  if (seleccionados.length === 0) {
+      // Si no hay selección, envío y cambio de posición se permiten.
+      if (btnEnvio) btnEnvio.disabled = false;
+      if (btnCambio) btnCambio.disabled = false;
+      [btnDestruir, btnEliminar, btnEstudio, btnExportarSel]
+        .forEach(btn => btn && btn.setAttribute('disabled', 'disabled'));
+      return;
+  }
+
+  // Obtener estados de muestras seleccionadas
+  const estados = seleccionados.map(cb => {
+      const fila = cb.closest('tr');
+      const celdaEstado = fila.querySelector('[data-estado]');
+      return celdaEstado ? celdaEstado.getAttribute('data-estado') : null;
+  });
+
+  const contieneEstado = estado => estados.includes(estado);
+
+  // ACCIONES PROHIBIDAS
+  const deshabilitarEnvio = false;
+
+  const deshabilitarCambio =
+        contieneEstado('DEST') ||
+        contieneEstado('ENV')  ||
+        contieneEstado('PENV');
+
+  const deshabilitarDestruir =
+        contieneEstado('DEST') || 
+        contieneEstado('ENV'); // Solo permitida si DISP o PENV
+
+  // ACCIONES PERMITIDAS
+  if (btnEnvio)  btnEnvio.disabled  = deshabilitarEnvio;
+  if (btnCambio) btnCambio.disabled = deshabilitarCambio;
+  if (btnDestruir) {
+      btnDestruir.disabled = deshabilitarDestruir;
+  }
+
+  // Acciones estándar existentes
+  if (btnEliminar) btnEliminar.disabled = false; // eliminar siempre es posible
+  if (btnEstudio)     btnEstudio.disabled     = (seleccionados.length === 0);
+  if (btnExportarSel) btnExportarSel.disabled = false;
+}
+
+function accionEstudio() {
+    const formAcciones = document.getElementById("acciones-form");
+    if (!formAcciones) return;
+
+    const seleccionados = document.querySelectorAll('input[type="checkbox"][name="muestra_id"]:checked, .global-hidden-muestra[name="muestra_id"]');
+    if (!seleccionados.length) {
+        alert('Por favor selecciona al menos una muestra');
+        return;
+    }
+
+    // Limpiar ocultos previos para evitar duplicados
+    formAcciones.querySelectorAll('input[type="hidden"][data-accion="estudio-muestra"]').forEach(function(el) {
+        el.remove();
+    });
+
+    // Asegurar el flag de acción
+    let hiddenAccion = formAcciones.querySelector('input[type="hidden"][name="estudio"][data-accion="estudio-flag"]');
+    if (!hiddenAccion) {
+        hiddenAccion = document.createElement('input');
+        hiddenAccion.type = 'hidden';
+        hiddenAccion.name = 'estudio';
+        hiddenAccion.setAttribute('data-accion', 'estudio-flag');
+        formAcciones.appendChild(hiddenAccion);
+    }
+    hiddenAccion.value = 'true';
+
+    // Añadir IDs seleccionados por si los checkboxes no están dentro del form
+    seleccionados.forEach(function(el) {
+        const h = document.createElement('input');
+        h.type = 'hidden';
+        h.name = 'muestra_id';
+        h.value = el.value;
+        h.setAttribute('data-accion', 'estudio-muestra');
+        formAcciones.appendChild(h);
+    });
+
+    formAcciones.submit();
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    const headers = document.querySelectorAll(".collapsible-header");
+
+    headers.forEach(header => {
+        header.addEventListener("click", function() {
+            const content = this.nextElementSibling;
+
+            this.classList.toggle("active");
+
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null;
+                content.classList.remove("open");
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px";
+                content.classList.add("open");
+            }
+        });
+    });
+
+    // Auto-abrir filtros si hay filtros activos en la URL
+    var filterParams = new URLSearchParams(window.location.search);
+    var filterKeys = ['id_individuo','nom_lab','id_material','estudio',
+      'volumen_actual','unidad_volumen','concentracion_actual','unidad_concentracion','masa_actual','unidad_masa',
+      'fecha_extraccion','fecha_llegada','centro_procedencia','estado_actual',
+      'congelador','estante','cajon','rack','caja','observaciones'];
+    var hayFiltros = filterKeys.some(function(k) { return filterParams.get(k); });
+    if (hayFiltros) {
+      var filtroHeader = document.querySelector('.collapsible-header');
+      if (filtroHeader) {
+        filtroHeader.classList.add('active');
+        var filtroContent = filtroHeader.nextElementSibling;
+        filtroContent.style.maxHeight = filtroContent.scrollHeight + 'px';
+        filtroContent.classList.add('open');
+      }
+    }
+
+    setTimeout(function() {
+      actualizarEstadoBotones();
+      console.log('Inicialización completada');
+    }, 100);
+    
+    const checkboxes = document.querySelectorAll('input[type="checkbox"][name="muestra_id"]');
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', actualizarEstadoBotones);
+    });
+});
+</script>
+
+<script src="{% static 'js/global_table_utils.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  initSortableTable('.styled-table', { excludeColumns: [0] });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  // ===================== OVERLAY DE PROGRESO =====================
+  function mostrarProgreso(texto) {
+    const prev = document.getElementById('progreso-overlay');
+    if (prev) prev.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'progreso-overlay';
+    overlay.innerHTML = `
+      <div class="progreso-popup">
+        <h2>${texto}</h2>
+        <div class="progreso-bar-wrapper">
+          <div class="progreso-bar" id="progreso-bar"></div>
+        </div>
+        <p class="progreso-info" id="progreso-txt"><span class="progreso-spinner"></span>Procesando...</p>
+        <p class="progreso-counter" id="progreso-cnt"></p>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+  }
+
+  function _actualizarBarraProgreso(current, total) {
+    const bar = document.getElementById('progreso-bar');
+    const txt = document.getElementById('progreso-txt');
+    const cnt = document.getElementById('progreso-cnt');
+    if (!bar) return;
+    const pct = total > 0 ? (current / total * 100) : 0;
+    bar.style.width = pct.toFixed(1) + '%';
+    bar.textContent = Math.round(pct) + '%';
+    if (txt) txt.innerHTML = '<span class="progreso-spinner"></span>Procesando registro ' + current + ' de ' + total;
+    if (cnt) cnt.textContent = current + ' / ' + total;
+  }
+
+  function cerrarProgreso(exito, mensaje) {
+    clearInterval(window._progresoInterval);
+    const bar = document.getElementById('progreso-bar');
+    const txt = document.getElementById('progreso-txt');
+    const cnt = document.getElementById('progreso-cnt');
+    const overlay = document.getElementById('progreso-overlay');
+    if (!bar || !overlay) return;
+    bar.style.width = '100%';
+    bar.textContent = '100%';
+    bar.classList.add(exito ? 'done' : 'error');
+    if (txt) txt.innerHTML = mensaje || '¡Completado!';
+    if (cnt) cnt.textContent = '';
+    setTimeout(() => {
+      overlay.style.transition = 'opacity 0.4s ease';
+      overlay.style.opacity = '0';
+      setTimeout(() => overlay.remove(), 400);
+    }, 800);
+  }
+
+  // Acción con progreso real vía JSON streaming (no cambia de página)
+  async function accionConProgreso(url, formData, titulo) {
+    mostrarProgreso(titulo);
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-CSRFToken': formData.get('csrfmiddlewaretoken') }
+      });
+      const ct = response.headers.get('Content-Type') || '';
+      if (ct.includes('text/html')) { const html = await response.text(); document.open(); document.write(html); document.close(); return; }
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          try {
+            const data = JSON.parse(line);
+            if (data.status === 'processing' || data.status === 'start') {
+              _actualizarBarraProgreso(data.current, data.total);
+            } else if (data.status === 'done') {
+              _actualizarBarraProgreso(data.total, data.total);
+              cerrarProgreso(true, data.message || '¡Completado!');
+              setTimeout(() => { window.location.href = data.redirect || location.href; }, 900);
+              return;
+            } else if (data.status === 'error') {
+              cerrarProgreso(false, data.message || 'Error en el proceso');
+              return;
+            }
+          } catch(e) { /* línea no parseable, ignorar */ }
+        }
+      }
+      // Si no hubo mensaje 'done' explícito, recargar
+      cerrarProgreso(true, '¡Completado!');
+      setTimeout(() => { window.location.href = location.href; }, 900);
+    } catch (err) {
+      cerrarProgreso(false, 'Error de conexión: ' + err.message);
+    }
+  }
+
+  function descargarConProgreso(url, texto) {
+    mostrarProgreso(texto);
+    // Simular progreso para descargas
+    let width = 0;
+    const bar = document.getElementById('progreso-bar');
+    window._progresoInterval = setInterval(() => {
+      if (width < 85) {
+        width += Math.random() * 8 + 2;
+        if (width > 85) width = 85;
+        bar.style.width = width + '%';
+        bar.textContent = Math.round(width) + '%';
+      }
+    }, 400);
+    fetch(url)
+      .then(response => {
+        if (!response.ok) throw new Error('Error en la descarga');
+        return response.blob().then(blob => ({ blob, response }));
+      })
+      .then(({ blob, response }) => {
+        const a = document.createElement('a');
+        const blobUrl = window.URL.createObjectURL(blob);
+        a.href = blobUrl;
+        const disposition = response.headers.get('Content-Disposition');
+        let filename = 'descarga.xlsx';
+        if (disposition) {
+          const match = disposition.match(/filename[^;=\n]*=(['"]?)([^'"\n]*)/i);
+          if (match && match[2]) filename = match[2];
+        }
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(blobUrl);
+        a.remove();
+        cerrarProgreso(true, 'Â¡Descarga completada!');
+      })
+      .catch(() => {
+        cerrarProgreso(false, 'Error en la descarga');
+      });
+  }
+</script>
+{% if messages %}
+ {% for message in messages %}
+  <script>
+      Swal.fire({
+        title: '{{ message.tags|capfirst }}',
+        text: '{{ message|escapejs }}',
+        icon: '{{ message.tags }}',
+        confirmButtonText: 'Aceptar'
+      });
+  </script>
+{% endfor %}
+{% endif %}
+<style>
+  #progreso-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 99999;
+    animation: progresoFadeIn 0.3s ease;
+  }
+  @keyframes progresoFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes progresoSlideUp { from { opacity: 0; transform: translateY(30px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  .progreso-popup {
+    background: white; border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    padding: 36px 34px 30px; text-align: center;
+    max-width: 440px; width: 90%;
+    animation: progresoSlideUp 0.35s ease;
+  }
+  .progreso-popup h2 { color: #1a1a2e; margin-bottom: 22px; font-size: 18px; font-weight: 600; }
+  .progreso-bar-wrapper { background: #e9ecef; border-radius: 8px; height: 26px; overflow: hidden; margin-bottom: 10px; }
+  .progreso-bar {
+    background: linear-gradient(90deg, #4361ee, #3a0ca3); height: 100%; border-radius: 8px;
+    transition: width 0.3s ease; width: 0%;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 12px; font-weight: 700; min-width: 40px;
+  }
+  .progreso-bar.done { background: linear-gradient(90deg, #2dc653, #1b9e3e); }
+  .progreso-bar.error { background: linear-gradient(90deg, #e63946, #c1121f); }
+  .progreso-info { color: #555; font-size: 14px; margin-top: 10px; }
+  .progreso-counter { color: #888; font-size: 12px; margin-top: 5px; }
+  .progreso-spinner {
+    display: inline-block; width: 16px; height: 16px;
+    border: 2.5px solid #ddd; border-top-color: #4361ee; border-radius: 50%;
+    animation: progresoSpin 0.7s linear infinite; vertical-align: middle; margin-right: 6px;
+  }
+  @keyframes progresoSpin { to { transform: rotate(360deg); } }
+</style>
+{% endblock %}

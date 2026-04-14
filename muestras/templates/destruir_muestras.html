@@ -1,0 +1,80 @@
+{% extends "master.html" %}
+
+{% block title %}
+Destruir muestras
+{% endblock %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+<div class="form-container">
+
+    <!-- BARRA DE ACCIONES -->
+    <div class="acciones-estudios">
+        <a href="/muestras" class="accion-btn accion-secundaria">
+            ⬅ Volver a la lista de muestras
+        </a>
+    </div>
+
+    <!-- CABECERA -->
+    <div class="form-header">
+        <h1>🔥 Destruir muestras</h1>
+        <p class="form-subtitle">
+            Registre la información de la destrucción de las muestras seleccionadas.
+        </p>
+    </div>
+
+    <!-- LISTA DE MUESTRAS A DESTRUIR -->
+    <div class="form-card">
+        <h2>🧬 Muestras a destruir</h2>
+        <p>Las siguientes muestras serán destruidas:</p>
+        <ul>
+            {% for muestra in muestras_a_destruir %}
+                <li>{{ muestra.nom_lab }} - {{ muestra.id_individuo }} ({{ muestra.get_estado_actual_display }})</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- FORMULARIO -->
+    <form method="post" class="styled-form">
+        {% csrf_token %}
+
+        <!-- DATOS DE LA DESTRUCCIÓN -->
+        <div class="form-card">
+            <h2>📋 Información de la destrucción</h2>
+
+            {% for field in form %}
+                <div class="form-field">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                        {% if field.field.required %}
+                            <span class="required">*</span>
+                        {% endif %}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+
+                    {% if field.errors %}
+                        <div class="error-message">
+                            {{ field.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- BOTONES -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-danger">
+                🔥 Confirmar Destrucción
+            </button>
+            <a href="/muestras" class="btn btn-secondary">
+                Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

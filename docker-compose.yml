@@ -1,0 +1,52 @@
+services:
+  db:
+    image: mysql:8.0.32
+    container_name: django_mysql_db
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "${COMPOSE_DB_BIND}"
+    volumes:
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./mysql/mysql.ini:/etc/mysql/conf.d/mysql.ini:ro
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u$$MYSQL_USER -p$$MYSQL_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+  web:
+    build: .
+    container_name: django_web_app
+    command: python manage.py runserver 0.0.0.0:8000
+    environment:
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_PORT: ${MYSQL_PORT}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD}
+      DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL}
+      DJANGO_DEBUG: ${DJANGO_DEBUG}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+    volumes:
+      - .:/usr/src/app
+      - static_volume:/usr/src/app/productionstaticfiles
+    ports:
+      - "${COMPOSE_WEB_BIND}"
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
+  static_volume:

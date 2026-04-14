@@ -1,0 +1,402 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}
+Materiales
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/muestras_todas.css' %}">
+<link rel="stylesheet" href="{% static 'css/estudios_todos.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+  button[disabled],
+  .btn.disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+  }
+
+  .action-row {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .filter-panel {
+    padding: 14px 0 6px;
+  }
+
+  .filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 18px 22px;
+    margin-bottom: 14px;
+  }
+
+  .filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .filter-field label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a3d7c;
+    line-height: 1.25;
+  }
+
+  .filter-field input[type="text"],
+  .filter-field select {
+    width: 100%;
+    height: 40px;
+    min-height: 40px;
+    padding: 8px 12px;
+    border: 1px solid #cfd8e3;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 14px;
+    background: #fff;
+  }
+
+  .filter-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+
+  .material-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid #d8e4ef;
+    background: #f5f9fc;
+    color: #35506d;
+    margin-right: 6px;
+    margin-bottom: 6px;
+  }
+
+</style>
+
+<div class="collapsible" style="border-radius: 8px; overflow: hidden;">
+  <button class="collapsible-header">🔍 Filtros</button>
+  <div class="collapsible-content">
+    <div class="filter-panel" style="border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+      <form action="" id="filter-form" method="GET">
+        <div class="filter-grid">
+          <div class="filter-field">
+            <label>Material</label>
+            <input type="text" name="nombre" value="{{ request.GET.nombre }}">
+          </div>
+
+          <div class="filter-field">
+            <label>Usa volumen</label>
+            <select name="usa_volumen">
+              <option value="">-- Seleccionar --</option>
+              <option value="si" {% if request.GET.usa_volumen == 'si' %}selected{% endif %}>Si</option>
+              <option value="no" {% if request.GET.usa_volumen == 'no' %}selected{% endif %}>No</option>
+            </select>
+          </div>
+
+          <div class="filter-field">
+            <label>Usa concentracion</label>
+            <select name="usa_concentracion">
+              <option value="">-- Seleccionar --</option>
+              <option value="si" {% if request.GET.usa_concentracion == 'si' %}selected{% endif %}>Si</option>
+              <option value="no" {% if request.GET.usa_concentracion == 'no' %}selected{% endif %}>No</option>
+            </select>
+          </div>
+
+          <div class="filter-field">
+            <label>Usa unidades</label>
+            <select name="usa_unidades">
+              <option value="">-- Seleccionar --</option>
+              <option value="si" {% if request.GET.usa_unidades == 'si' %}selected{% endif %}>Si</option>
+              <option value="no" {% if request.GET.usa_unidades == 'no' %}selected{% endif %}>No</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="filter-buttons">
+          <button type="submit" class="btn btn-primary">🔎 Filtrar</button>
+          <a href="{% url 'materiales_todos' %}" class="btn btn-secondary">✖ Eliminar filtros</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="collapsible" style="border-radius: 8px; overflow: hidden; margin-top: 15px;">
+  <button class="collapsible-header">⚙️ Acciones</button>
+  <div class="collapsible-content">
+    <div class="action-buttons" style="border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+      <div class="action-row">
+        <a href="{% url 'nuevo_material' %}" class="btn">➕ Nuevo material</a>
+        <a href="{% url 'upload_excel_materiales' %}" class="btn">📤📄 Importar materiales</a>
+      </div>
+
+      <div class="action-row">
+        <button type="button"
+                id="exportar-materiales-seleccionados-btn"
+                class="btn btn-success"
+                disabled
+                onclick="enviarAccionMateriales('exportar_seleccionados')">
+          📊✅ Exportar materiales seleccionados
+        </button>
+      </div>
+
+      <div class="action-row">
+        <button type="button"
+                id="eliminar-materiales-btn"
+                class="btn btn-danger"
+                disabled
+                onclick="validarSeleccionMateriales('eliminar', '¿Quieres eliminar los materiales seleccionados?')">
+          🗑️ Eliminar seleccionados
+        </button>
+      </div>
+
+      <div class="action-row">
+        <input type="button" value="☑️ Seleccionar todo" onclick="seleccionarTodoMateriales(true)" class="btn btn-secondary">
+        <input type="button" value="☐ Deseleccionar" onclick="seleccionarTodoMateriales(false)" class="btn btn-secondary">
+      </div>
+    </div>
+  </div>
+</div>
+
+<form action="{% url 'acciones_materiales' %}" method="post" id="acciones-materiales-form">
+  {% csrf_token %}
+  <button type="submit" value="true" name="exportar_seleccionados" style="display:none;"></button>
+  <button type="submit" value="true" name="eliminar" style="display:none;"></button>
+
+  <div class="table-container" style="margin-top: 15px;">
+    <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+      <label for="busqueda-input" style="font-weight: 500; color: #333;">Buscar:</label>
+      <input type="text"
+             id="busqueda-input"
+             value="{{ busqueda|default:'' }}"
+             placeholder="Escribe para buscar materiales..."
+             style="padding: 8px 12px; border: 1px solid #dfe3e6; border-radius: 6px; font-size: 14px; width: 300px;">
+      <button type="button" onclick="ejecutarBusqueda()" class="btn btn-secondary" style="padding: 8px 14px;">Buscar</button>
+      {% if busqueda %}
+        <button type="button" onclick="limpiarBusqueda()" class="btn btn-secondary" style="padding: 8px 14px;">Limpiar busqueda</button>
+      {% endif %}
+    </div>
+
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Material</th>
+          <th style="text-align:center;">Volumen</th>
+          <th style="text-align:center;">Unidades de volumen</th>
+          <th style="text-align:center;">Concentracion</th>
+          <th style="text-align:center;">Unidades de concentracion</th>
+          <th style="text-align:center;">Unidades</th>
+          <th style="text-align:center;">Tipo de unidades</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for material in materiales %}
+          <tr>
+            <td>
+              <input type="checkbox" name="material_id" value="{{ material.id }}" class="form-control" onchange="actualizarEstadoBotonesMateriales()">
+              <a href="{% url 'editar_material' material.id %}" class="chip-detalle" title="Editar" style="padding: 2px 5px; margin-left: 5px;">✏️</a>
+            </td>
+            <td><strong>{{ material.nombre }}</strong></td>
+            <td style="text-align:center;">{% if material.usa_volumen %}✔️{% else %}✖️{% endif %}</td>
+            <td style="text-align:center;">{{ material.unidades_volumen|default_if_none:"" }}</td>
+            <td style="text-align:center;">{% if material.usa_concentracion %}✔️{% else %}✖️{% endif %}</td>
+            <td style="text-align:center;">{{ material.unidades_concentracion|default_if_none:"" }}</td>
+            <td style="text-align:center;">{% if material.usa_unidades_bloque %}✔️{% else %}✖️{% endif %}</td>
+            <td style="text-align:center;">{{ material.unidades_recuento|default_if_none:"" }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="8" style="text-align:center;">No hay materiales creados todavia.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</form>
+
+<div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <label for="items-por-pagina" style="font-weight: 600; color: #333;">Items por pagina:</label>
+    <form method="GET" style="display: inline; margin: 0;">
+      {% for key, value in request.GET.items %}
+        {% if key != 'items_por_pagina' and key != 'page' %}
+          <input type="hidden" name="{{ key }}" value="{{ value }}">
+        {% endif %}
+      {% endfor %}
+      <select name="items_por_pagina"
+              id="items-por-pagina"
+              style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;"
+              onchange="this.form.submit();">
+        <option value="10" {% if items_por_pagina == 10 %}selected{% endif %}>10</option>
+        <option value="25" {% if items_por_pagina == 25 %}selected{% endif %}>25</option>
+        <option value="50" {% if items_por_pagina == 50 %}selected{% endif %}>50</option>
+        <option value="100" {% if items_por_pagina == 100 %}selected{% endif %}>100</option>
+        <option value="todas" {% if items_por_pagina == 'todas' %}selected{% endif %}>Todas</option>
+      </select>
+    </form>
+  </div>
+
+  <div style="font-weight: 600; color: #333;">
+    Pagina {{ materiales_page.number }} de {{ paginator.num_pages }} | Total: {{ contador_materiales }} material{{ contador_materiales|pluralize }}
+  </div>
+
+  <div style="display: flex; gap: 8px; align-items: center;">
+    {% if materiales_page.has_previous %}
+      <a href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&amp;{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;">« Primera</a>
+      <a href="?page={{ materiales_page.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&amp;{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;">‹ Anterior</a>
+    {% else %}
+      <button class="btn btn-secondary" disabled style="padding: 8px 12px; font-size: 12px;">« Primera</button>
+      <button class="btn btn-secondary" disabled style="padding: 8px 12px; font-size: 12px;">‹ Anterior</button>
+    {% endif %}
+
+    <div style="display: flex; gap: 4px; align-items: center;">
+      {% for num in paginator.page_range %}
+        {% if num == materiales_page.number %}
+          <span style="padding: 6px 10px; background: #1a3d7c; color: white; border-radius: 4px; font-weight: 600;">{{ num }}</span>
+        {% elif num > materiales_page.number|add:'-3' and num < materiales_page.number|add:'3' %}
+          <a href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&amp;{{ key }}={{ value }}{% endif %}{% endfor %}" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #1a3d7c; background: white;">{{ num }}</a>
+        {% elif num == 1 or num == paginator.num_pages %}
+          <a href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&amp;{{ key }}={{ value }}{% endif %}{% endfor %}" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #1a3d7c; background: white;">{{ num }}</a>
+        {% elif num == materiales_page.number|add:'-3' or num == materiales_page.number|add:'3' %}
+          <span style="padding: 0 4px;">...</span>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    {% if materiales_page.has_next %}
+      <a href="?page={{ materiales_page.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&amp;{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;">Siguiente ›</a>
+      <a href="?page={{ paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&amp;{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;">Ultima »</a>
+    {% else %}
+      <button class="btn btn-secondary" disabled style="padding: 8px 12px; font-size: 12px;">Siguiente ›</button>
+      <button class="btn btn-secondary" disabled style="padding: 8px 12px; font-size: 12px;">Ultima »</button>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const headers = document.querySelectorAll(".collapsible-header");
+    headers.forEach(function(header) {
+      header.addEventListener("click", function() {
+        const content = this.nextElementSibling;
+        this.classList.toggle("active");
+        if (content.style.maxHeight) {
+          content.style.maxHeight = null;
+          content.classList.remove("open");
+        } else {
+          content.style.maxHeight = content.scrollHeight + "px";
+          content.classList.add("open");
+        }
+      });
+    });
+
+    const hayFiltros = "{{ request.GET.nombre }}" || "{{ request.GET.usa_volumen }}" || "{{ request.GET.usa_concentracion }}" || "{{ request.GET.usa_unidades }}";
+    if (hayFiltros && headers.length) {
+      const filtrosHeader = headers[0];
+      const filtrosContent = filtrosHeader.nextElementSibling;
+      filtrosHeader.classList.add("active");
+      filtrosContent.style.maxHeight = filtrosContent.scrollHeight + "px";
+      filtrosContent.classList.add("open");
+    }
+
+    obtenerCheckboxesMateriales().forEach(function(cb) {
+      cb.addEventListener("change", actualizarEstadoBotonesMateriales);
+    });
+    actualizarEstadoBotonesMateriales();
+  });
+
+  function ejecutarBusqueda() {
+    const url = new URL(window.location.href);
+    const value = document.getElementById("busqueda-input").value.trim();
+    if (value) {
+      url.searchParams.set("busqueda", value);
+    } else {
+      url.searchParams.delete("busqueda");
+    }
+    url.searchParams.delete("page");
+    window.location.href = url.toString();
+  }
+
+  function limpiarBusqueda() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("busqueda");
+    url.searchParams.delete("page");
+    window.location.href = url.toString();
+  }
+
+  function obtenerCheckboxesMateriales() {
+    return Array.from(document.querySelectorAll('input[type="checkbox"][name="material_id"]'));
+  }
+
+  function actualizarEstadoBotonesMateriales() {
+    const seleccionados = obtenerCheckboxesMateriales().some(function(cb) { return cb.checked; });
+    const btnExport = document.getElementById("exportar-materiales-seleccionados-btn");
+    const btnEliminar = document.getElementById("eliminar-materiales-btn");
+    if (btnExport) btnExport.disabled = !seleccionados;
+    if (btnEliminar) btnEliminar.disabled = !seleccionados;
+  }
+
+  function seleccionarTodoMateriales(checked) {
+    obtenerCheckboxesMateriales().forEach(function(cb) {
+      cb.checked = checked;
+    });
+    actualizarEstadoBotonesMateriales();
+  }
+
+  function enviarAccionMateriales(nombreAccion) {
+    const seleccionados = obtenerCheckboxesMateriales().some(function(cb) { return cb.checked; });
+    if (!seleccionados) {
+      alert("Selecciona al menos un material.");
+      return;
+    }
+    const form = document.getElementById("acciones-materiales-form");
+    const boton = form.querySelector('button[name="' + nombreAccion + '"]');
+    if (boton) boton.click();
+  }
+
+  function validarSeleccionMateriales(nombreAccion, mensaje) {
+    const seleccionados = obtenerCheckboxesMateriales().some(function(cb) { return cb.checked; });
+    if (!seleccionados) {
+      alert("Selecciona al menos un material.");
+      return;
+    }
+    confirmarAccionApp({
+      title: nombreAccion === "eliminar" ? "Eliminar materiales" : "Confirmar accion",
+      message: mensaje,
+      confirmText: nombreAccion === "eliminar" ? "Eliminar" : "Continuar"
+    }).then(function(confirmado) {
+      if (!confirmado) return;
+      enviarAccionMateriales(nombreAccion);
+    });
+  }
+
+</script>
+
+{% if messages %}
+{% for message in messages %}
+<script>
+  Swal.fire({
+    title: '{{ message.tags|capfirst }}',
+    text: '{{ message|escapejs }}',
+    icon: '{{ message.tags }}',
+    confirmButtonText: 'Aceptar'
+  });
+</script>
+{% endfor %}
+{% endif %}
+{% endblock %}

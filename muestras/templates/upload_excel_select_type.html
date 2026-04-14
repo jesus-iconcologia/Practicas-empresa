@@ -1,0 +1,68 @@
+{% extends "master.html" %}
+
+{% block title %}
+Importar muestras por Excel
+{% endblock %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+<style>
+  .mode-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+    margin-top: 18px;
+  }
+  .mode-card {
+    display: block;
+    border: 1px solid #d7e3ef;
+    border-radius: 14px;
+    padding: 18px;
+    background: #fbfdff;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  }
+  .mode-card:hover {
+    transform: translateY(-2px);
+    border-color: #3b82c4;
+    box-shadow: 0 10px 24px rgba(23, 58, 99, 0.08);
+  }
+  .mode-card-title {
+    font-weight: 700;
+    color: #173a63;
+    margin-bottom: 8px;
+  }
+  .mode-card-text {
+    margin: 0;
+    color: #5b7186;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+</style>
+
+<div class="form-container">
+  <div class="form-header">
+    <h1>Importar muestras por Excel</h1>
+    <p class="form-subtitle">Paso 1 de 2. Elige primero el tipo de importación que vas a realizar.</p>
+  </div>
+
+  <div class="form-card info-card">
+    <h2>Seleccionar tipo de importación</h2>
+    <p class="form-subtitle" style="margin-top:0;">Cada opción lleva a una segunda pantalla con su plantilla e instrucciones específicas.</p>
+    <div class="mode-grid">
+      {% for card in import_mode_cards %}
+      <a href="?import_mode={{ card.value }}" class="mode-card">
+        <div class="mode-card-title">{{ card.label }}</div>
+        <p class="mode-card-text">{{ card.card_text }}</p>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <a href="/muestras" class="accion-btn accion-secundaria">Volver a muestras</a>
+  </div>
+</div>
+{% endblock %}

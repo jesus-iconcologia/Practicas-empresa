@@ -1,0 +1,93 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}
+Crear recurso
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+
+<style>
+    .form-card-priority {
+        border: 1px solid #cfe0f5;
+        background: linear-gradient(180deg, #f7fbff 0%, #eef5fb 100%);
+    }
+
+    .section-intro {
+        margin: -4px 0 14px;
+        color: #5b6f85;
+        font-size: 14px;
+    }
+</style>
+
+<div class="form-container">
+    <div class="acciones-estudios">
+        <a href="/archivo" class="accion-btn accion-secundaria">Volver al archivo</a>
+    </div>
+
+    <div class="form-header">
+        <h1>Crear recurso</h1>
+        <p class="form-subtitle">Empiece por lo esencial del recurso. Las posiciones se podrán importar más adelante cuando sea necesario.</p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="styled-form">
+        {% csrf_token %}
+
+        <div class="form-card form-card-priority">
+            <h2>Datos clave</h2>
+            <p class="section-intro">Defina primero el nombre del recurso y su estructura.</p>
+
+            {% for field in form %}
+                {% if field.name == 'congelador' or field.name == 'tipo_estructura' %}
+                <div class="form-field">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                        {% if field.field.required %}
+                            <span class="required">*</span>
+                        {% endif %}
+                    </label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% if field.errors %}
+                        <div class="error-text">{{ field.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="form-card">
+            <h2>Información del recurso</h2>
+            <p class="section-intro">Añada después los datos complementarios del recurso.</p>
+
+            {% for field in form %}
+                {% if field.name != 'congelador' and field.name != 'tipo_estructura' %}
+                <div class="form-field">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                        {% if field.field.required %}
+                            <span class="required">*</span>
+                        {% endif %}
+                    </label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% if field.errors %}
+                        <div class="error-text">{{ field.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="accion-btn accion-primaria">Crear recurso</button>
+            <a href="/archivo" class="accion-btn accion-secundaria">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

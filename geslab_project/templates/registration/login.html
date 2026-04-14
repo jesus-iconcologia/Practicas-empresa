@@ -1,0 +1,71 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}Acceso | GesLab{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+
+<div class="login-container">
+    <div class="login-card">
+        {% if logged_out %}
+            <p class="success-msg">La sesion se ha cerrado correctamente.</p>
+        {% endif %}
+
+        {% if messages %}
+            {% for message in messages %}
+                <p class="{% if message.tags %}{{ message.tags }}-msg{% else %}info-msg{% endif %}">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+
+        {% if form.errors %}
+            <p class="error-msg">El usuario o la contraseña no son correctos. Intentalo de nuevo.</p>
+        {% endif %}
+
+        {% if next and user.is_authenticated %}
+            <p class="info-msg">
+                Tu cuenta ha iniciado sesion, pero no tiene permisos para entrar en esa pagina.
+                Si necesitas acceder, cierra sesion y entra con otro usuario autorizado.
+            </p>
+        {% endif %}
+
+        <div class="login-logo">
+            <img src="{% static 'img/logo.png' %}" alt="Logo de GesLab">
+        </div>
+
+        <h2>Iniciar sesion</h2>
+
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="id_username">Usuario</label>
+                <input
+                    type="text"
+                    name="username"
+                    id="id_username"
+                    value="{{ form.username.value|default:'' }}"
+                    autocomplete="username"
+                    autofocus
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="id_password">Contrasena</label>
+                <input
+                    type="password"
+                    name="password"
+                    id="id_password"
+                    autocomplete="current-password"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="login-btn">Acceder</button>
+            <input type="hidden" name="next" value="{{ next }}">
+        </form>
+    </div>
+</div>
+
+{% endblock %}

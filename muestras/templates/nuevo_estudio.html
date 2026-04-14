@@ -1,0 +1,67 @@
+{%extends 'master.html'%}
+
+{% block title %} 
+Añadir estudio
+{% load static %}
+{% endblock %}
+<!-- Formulario para crear un nuevo estudio -->
+{% block content %}
+<link rel ="stylesheet" href="{% static 'css/forms.css' %}">
+<div class="form-container">
+
+    <!-- CABECERA -->
+    <div class="form-header">
+        <h1>🧬 Crear nuevo estudio</h1>
+        <p class="form-subtitle">
+            Introduzca la información básica del estudio. Los campos marcados con * son obligatorios.
+        </p>
+    </div>
+
+    <!-- FORMULARIO -->
+    <form method="post" id="Estudioform" class="styled-form">
+        {% csrf_token %}
+
+        <div class="form-card">
+            <h2>📋 Datos del estudio</h2>
+
+            {% for field in form %}
+                <div class="form-field">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                        {% if field.field.required %}
+                            <span class="required">*</span>
+                        {% endif %}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+
+                    {% if field.errors %}
+                        <div class="error-text">
+                            {{ field.errors|striptags }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- ACCIONES -->
+        <div class="form-actions">
+            <button type="submit" class="accion-btn accion-primaria">
+                💾 Guardar estudio
+            </button>
+
+            <a href="/estudios" class="accion-btn accion-secundaria">
+                ↩ Volver a estudios
+            </a>
+        </div>
+    </form>
+
+</div>
+
+{% endblock %}
+
+

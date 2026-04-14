@@ -1,0 +1,1180 @@
+﻿{% extends "master.html" %}
+{% load static %}
+{% block title %}
+Archivo de muestras
+{% endblock %}
+
+{% block content %} 
+<!-- Página que muestra todas las localizaciones de las muestras en el archivo -->
+
+<link rel="stylesheet" href="{% static 'css/localizaciones_todas.css' %}">
+<script src="{% static 'js/localizaciones_todas.js' %}?v=6"></script>
+
+<style>
+  .page-content {
+    width: 100%;
+    max-width: 1250px;
+  }
+
+  button[disabled] {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+  }
+
+  .filter-field select,
+  .filter-field input[type="text"],
+  .filter-field input[type="date"] {
+    width: 100%;
+    height: 40px;
+    min-height: 40px;
+    padding: 8px 12px;
+    border: 1px solid #cfd8e3;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 14px;
+    background: #fff;
+  }
+
+  #archivo {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .resource-legend {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 12px 14px;
+    border: 1px solid #d9e3ef;
+    border-radius: 10px;
+    background: linear-gradient(180deg, #f7fbff 0%, #eef5fb 100%);
+  }
+
+  .archivo-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 18px;
+    margin: 16px 0 18px;
+  }
+
+  .archivo-topbar h2 {
+    margin: 0;
+    color: #173a63;
+  }
+
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #26415f;
+  }
+
+  .legend-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(24, 46, 79, 0.18);
+  }
+
+  .legend-80 { background: #cfe8ff; }
+  .legend-20 { background: #6fb7ff; }
+  .legend-nevera { background: #6fdcc3; }
+
+  .resource-chip {
+    border-left: 4px solid transparent;
+    padding-left: 6px;
+    border-radius: 6px;
+  }
+
+  .resource-chip.resource-80 {
+    background: rgba(207, 232, 255, 0.55);
+    border-left-color: #7eb6ea;
+  }
+
+  .resource-chip.resource-20 {
+    background: rgba(111, 183, 255, 0.36);
+    border-left-color: #2b78c7;
+  }
+
+  .resource-chip.resource-nevera {
+    background: rgba(111, 220, 195, 0.30);
+    border-left-color: #1f9983;
+  }
+
+  .filter-highlight {
+    box-shadow: 0 0 0 2px rgba(43, 120, 199, 0.22);
+    border-color: #5f9bd5 !important;
+    background: linear-gradient(180deg, #f1f7ff 0%, #e2efff 100%) !important;
+  }
+
+  .filter-highlight-deep {
+    box-shadow: 0 0 0 2px rgba(29, 95, 170, 0.32);
+    border-color: #2b78c7 !important;
+    background: linear-gradient(180deg, #e4f0ff 0%, #d1e6ff 100%) !important;
+  }
+
+  .box-visual-list {
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 8px;
+    border: 1px solid #d9e3ef;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #fbfdff 0%, #f3f8fd 100%);
+  }
+
+  .box-visual-row {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 6px;
+    align-items: start;
+    margin-bottom: 6px;
+  }
+
+  .box-visual-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .box-row-label {
+    min-height: 42px;
+    border-radius: 8px;
+    background: #e8f1fb;
+    color: #1c4a78;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  .box-row-cells {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(52px, 1fr));
+    gap: 6px;
+  }
+
+  .box-cell-visual {
+    position: relative;
+    min-height: 42px;
+    border-radius: 8px;
+    border: 1px solid #d5e1ee;
+    background: #f8fbff;
+    padding: 14px 4px 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    cursor: pointer;
+  }
+
+  .box-cell-empty {
+    background: linear-gradient(180deg, #f8fafc 0%, #eef3f7 100%);
+    border-color: #cfd9e4;
+    color: #6f8296;
+  }
+
+  .box-cell-filled {
+    background: linear-gradient(180deg, #dff1ff 0%, #bfe0ff 100%);
+    border-color: #69a7df;
+    color: #12385d;
+    box-shadow: inset 0 0 0 1px rgba(80, 138, 196, 0.18);
+  }
+
+  .box-cell-checkbox {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    margin: 0;
+    transform: scale(0.85);
+  }
+
+  .box-cell-corner {
+    position: absolute;
+    top: 4px;
+    right: 5px;
+    font-size: 9px;
+    font-weight: 700;
+    color: #4e6782;
+  }
+
+  .box-cell-main {
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.2;
+    word-break: break-word;
+    text-align: center;
+  }
+
+  .box-cell-link {
+    color: inherit;
+    text-decoration: none;
+    display: block;
+  }
+
+  .box-cell-link:hover {
+    text-decoration: underline;
+  }
+
+  .box-cell-status {
+    display: none;
+  }
+
+  .filter-field.is-hidden {
+    display: none;
+  }
+
+  .draft-section {
+    margin-top: 22px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border: 1px solid #d9e3ef;
+  }
+
+  .draft-header {
+    padding: 14px 18px 10px;
+    background: linear-gradient(180deg, #f7fbff 0%, #eef5fb 100%);
+    border-bottom: 1px solid #d9e3ef;
+  }
+
+  .draft-header h2 {
+    margin: 0 0 6px;
+    color: #173a63;
+    font-size: 18px;
+  }
+
+  .draft-header p {
+    margin: 0;
+    color: #48617d;
+    font-size: 13px;
+  }
+
+  .draft-list {
+    display: grid;
+    gap: 12px;
+    padding: 16px;
+    background: #fff;
+  }
+
+  .draft-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+    background: linear-gradient(180deg, #ffffff 0%, #f9fbfd 100%);
+    border: 1px solid #dbe5ef;
+    border-left: 4px solid #7eb6ea;
+    border-radius: 10px;
+  }
+
+  .draft-card strong {
+    display: block;
+    margin-bottom: 6px;
+    color: #173a63;
+    font-size: 15px;
+  }
+
+  .draft-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .draft-meta small {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #eef5fb;
+    color: #48617d;
+    line-height: 1.2;
+    font-size: 12px;
+    border: 1px solid #d9e3ef;
+  }
+
+  .draft-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .draft-actions .draft-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(16, 42, 67, 0.08);
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .draft-actions .draft-btn:hover {
+    transform: translateY(-1px);
+    text-decoration: none;
+  }
+
+  .draft-actions .btn-success.draft-btn {
+    background: #e6f4ea;
+    color: #2f6b3c;
+    border-color: #c7dfcd;
+  }
+
+  .draft-actions .btn-success.draft-btn:hover {
+    background: #d9ecdf;
+  }
+
+  .draft-actions .btn-secondary.draft-btn {
+    background: #e8f0fe;
+    color: #1a3d7c;
+    border-color: #c9d9f4;
+  }
+
+  .draft-actions .btn-secondary.draft-btn:hover {
+    background: #d6e3ff;
+  }
+
+  .draft-actions .btn-danger.draft-btn {
+    background: #f7e6e6;
+    color: #9b3d3d;
+    border-color: #e7c4c4;
+  }
+
+  .draft-actions .btn-danger.draft-btn:hover {
+    background: #f1dada;
+  }
+
+  @media (max-width: 900px) {
+    .archivo-topbar {
+      flex-direction: column;
+    }
+
+    .draft-card {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>
+
+<!-- ========== PANEL DE FILTROS ========== -->
+<div class="collapsible" style="border-radius: 8px; overflow: hidden;">
+    <button class="collapsible-header">🔍 Filtros</button>
+    <div class="collapsible-content">
+      <div class="filter-panel" style="border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+        <form action="" id="filter-form">
+          <div class="filter-grid">
+            <div class="filter-field">
+              <label>Tipo de recurso</label>
+              <select name="filtro_tipo" id="filtro-tipo">
+                <option value="">-- Seleccionar tipo --</option>
+                {% for value, label in opciones_tipos %}
+                  <option value="{{ value }}" {% if filtro_tipo == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="filter-field">
+              <label>Recurso</label>
+              <select name="filtro_congelador" id="filtro-congelador">
+                <option value="">-- Seleccionar recurso --</option>
+                {% for cong in opciones_congeladores %}
+                  <option value="{{ cong }}" {% if filtro_congelador == cong %}selected{% endif %}>{{ cong }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="filter-field">
+              <label>Estante</label>
+              <select name="filtro_estante" id="filtro-estante" disabled>
+                <option value="">-- Selecciona un recurso primero --</option>
+              </select>
+            </div>
+            <div class="filter-field" id="filter-field-rack">
+              <label>Rack</label>
+              <select name="filtro_rack" id="filtro-rack" disabled>
+                <option value="">-- Selecciona un estante primero --</option>
+              </select>
+            </div>
+            <div class="filter-field" id="filter-field-cajon">
+              <label>Caj&oacute;n</label>
+              <select name="filtro_cajon" id="filtro-cajon" disabled>
+                <option value="">-- Disponible para Nevera y Congelador -20 --</option>
+              </select>
+            </div>
+            <div class="filter-field" id="filter-field-bandeja">
+              <label>Bandeja</label>
+              <select name="filtro_bandeja" id="filtro-bandeja" disabled>
+                <option value="">-- Selecciona un rack primero --</option>
+              </select>
+            </div>
+            <div class="filter-field" id="filter-field-caja">
+              <label>Caja</label>
+              <select name="filtro_caja" id="filtro-caja" disabled>
+                <option value="">-- Selecciona una bandeja primero --</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="filter-buttons">
+            <button type="submit" class="btn btn-primary">
+              🔎 Filtrar
+            </button>
+            <a href="/archivo/" class="btn btn-secondary">
+              ✖ Eliminar filtros
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const resourceTypeMap = {{ resource_type_map_json|safe }};
+  const selTipo = document.getElementById('filtro-tipo');
+  const selCongelador = document.getElementById('filtro-congelador');
+  const selEstante = document.getElementById('filtro-estante');
+  const fieldRack = document.getElementById('filter-field-rack');
+  const selRack = document.getElementById('filtro-rack');
+  const fieldCajon = document.getElementById('filter-field-cajon');
+  const selCajon = document.getElementById('filtro-cajon');
+  const fieldBandeja = document.getElementById('filter-field-bandeja');
+  const selBandeja = document.getElementById('filtro-bandeja');
+  const fieldCaja = document.getElementById('filter-field-caja');
+  const selCaja = document.getElementById('filtro-caja');
+  const savedCongelador = '{{ filtro_congelador|default:"" }}';
+  const savedEstante = '{{ filtro_estante|default:"" }}';
+  const savedRack = '{{ filtro_rack|default:"" }}';
+  const savedCajon = '{{ filtro_cajon|default:"" }}';
+  const savedBandeja = '{{ filtro_bandeja|default:"" }}';
+  const savedCaja = '{{ filtro_caja|default:"" }}';
+
+  function resetSelect(sel, placeholder) {
+    sel.innerHTML = '<option value="">' + placeholder + '</option>';
+    sel.disabled = true;
+  }
+
+  function isSimpleResource(resourceName) {
+    const tipo = resourceTypeMap[resourceName] || '';
+    return tipo === 'congelador_20' || tipo === 'nevera';
+  }
+
+  function syncResourceOptions() {
+    const selectedTipo = selTipo.value;
+    Array.from(selCongelador.options).forEach((option, index) => {
+      if (index === 0) return;
+      const visible = !selectedTipo || resourceTypeMap[option.value] === selectedTipo;
+      option.hidden = !visible;
+      if (!visible && option.selected) {
+        selCongelador.value = '';
+      }
+    });
+  }
+
+  function toggleSimpleFilters() {
+    const simple = isSimpleResource(selCongelador.value);
+    if (simple) {
+      resetSelect(selCajon, '-- Selecciona un estante primero --');
+    } else {
+      resetSelect(selCajon, '-- Disponible para Nevera y Congelador -20 --');
+    }
+  }
+
+  function cargarEstantes(congeladorNombre, callback) {
+    resetSelect(selEstante, '-- Cargando estantes... --');
+    resetSelect(selRack, '-- Selecciona un estante primero --');
+    resetSelect(selCajon, '-- Disponible para Nevera y Congelador -20 --');
+    resetSelect(selBandeja, '-- Selecciona un rack primero --');
+    resetSelect(selCaja, '-- Selecciona una bandeja primero --');
+
+    if (!congeladorNombre) {
+      resetSelect(selEstante, '-- Selecciona un recurso primero --');
+      return;
+    }
+
+    fetch('/api/get_estantes_por_congelador/?congelador=' + encodeURIComponent(congeladorNombre))
+      .then(r => r.json())
+      .then(data => {
+        selEstante.innerHTML = '<option value="">-- Seleccionar estante --</option>';
+        data.estantes.forEach(e => {
+          selEstante.innerHTML += '<option value="' + e.id + '">' + e.numero + '</option>';
+        });
+        selEstante.disabled = false;
+        if (callback) callback();
+      });
+  }
+
+  function cargarRacks(estanteId, callback, usarCajones) {
+    const target = usarCajones ? selCajon : selRack;
+    const loadingText = usarCajones ? '-- Cargando cajones... --' : '-- Cargando racks... --';
+    const selectText = usarCajones ? '-- Seleccionar cajón --' : '-- Seleccionar rack --';
+
+    resetSelect(target, loadingText);
+    if (!usarCajones) {
+      resetSelect(selBandeja, '-- Selecciona un rack primero --');
+      resetSelect(selCaja, '-- Selecciona una bandeja primero --');
+    }
+
+    if (!estanteId) {
+      resetSelect(target, '-- Selecciona un estante primero --');
+      return;
+    }
+
+    fetch('/api/get_racks_por_estante/?estante_id=' + encodeURIComponent(estanteId))
+      .then(r => r.json())
+      .then(data => {
+        target.innerHTML = '<option value="">' + selectText + '</option>';
+        data.racks.forEach(r => {
+          target.innerHTML += '<option value="' + r.id + '">' + r.numero + '</option>';
+        });
+        target.disabled = false;
+        if (callback) callback();
+      });
+  }
+
+  function cargarBandejas(rackId, callback) {
+    resetSelect(selBandeja, '-- Cargando bandejas... --');
+    resetSelect(selCaja, '-- Selecciona una bandeja primero --');
+
+    if (!rackId) {
+      resetSelect(selBandeja, '-- Selecciona un rack primero --');
+      return;
+    }
+
+    fetch('/api/get_bandejas_por_rack/?rack_id=' + encodeURIComponent(rackId))
+      .then(r => r.json())
+      .then(data => {
+        selBandeja.innerHTML = '<option value="">-- Seleccionar bandeja --</option>';
+        data.bandejas.forEach(b => {
+          selBandeja.innerHTML += '<option value="' + b.id + '">' + b.numero + '</option>';
+        });
+        selBandeja.disabled = false;
+        if (callback) callback();
+      });
+  }
+
+  function cargarCajas(bandejaId, callback) {
+    resetSelect(selCaja, '-- Cargando cajas... --');
+
+    if (!bandejaId) {
+      resetSelect(selCaja, '-- Selecciona una bandeja primero --');
+      return;
+    }
+
+    fetch('/api/get_cajas_por_bandeja/?bandeja_id=' + encodeURIComponent(bandejaId))
+      .then(r => r.json())
+      .then(data => {
+        selCaja.innerHTML = '<option value="">-- Seleccionar caja --</option>';
+        data.cajas.forEach(c => {
+          selCaja.innerHTML += '<option value="' + c.id + '">' + c.numero + '</option>';
+        });
+        selCaja.disabled = false;
+        if (callback) callback();
+      });
+  }
+
+  selCongelador.addEventListener('change', function() {
+    toggleSimpleFilters();
+    cargarEstantes(this.value);
+  });
+
+  selTipo.addEventListener('change', function() {
+    syncResourceOptions();
+    if (selCongelador.selectedOptions.length && selCongelador.selectedOptions[0].hidden) {
+      selCongelador.value = '';
+    }
+    selCongelador.dispatchEvent(new Event('change'));
+  });
+
+  selEstante.addEventListener('change', function() {
+    if (isSimpleResource(selCongelador.value)) {
+      cargarRacks(this.value, function() {
+        if (savedCajon) {
+          selCajon.value = savedCajon;
+        }
+      }, true);
+      return;
+    }
+    cargarRacks(this.value, null, false);
+  });
+
+  selRack.addEventListener('change', function() {
+    cargarBandejas(this.value);
+  });
+
+  selCajon.addEventListener('change', function() {
+    if (isSimpleResource(selCongelador.value)) {
+      resetSelect(selBandeja, '-- No disponible para este tipo --');
+      resetSelect(selCaja, '-- No disponible para este tipo --');
+    }
+  });
+
+  selBandeja.addEventListener('change', function() {
+    cargarCajas(this.value);
+  });
+
+  syncResourceOptions();
+  toggleSimpleFilters();
+
+  if (savedCongelador) {
+    selCongelador.value = savedCongelador;
+    toggleSimpleFilters();
+    cargarEstantes(savedCongelador, function() {
+      if (!savedEstante) {
+        return;
+      }
+      selEstante.value = savedEstante;
+
+      if (isSimpleResource(savedCongelador)) {
+        cargarRacks(savedEstante, function() {
+          if (savedCajon) {
+            selCajon.value = savedCajon;
+          }
+        }, true);
+        return;
+      }
+
+      cargarRacks(savedEstante, function() {
+        if (!savedRack) {
+          return;
+        }
+        selRack.value = savedRack;
+        cargarBandejas(savedRack, function() {
+          if (!savedBandeja) {
+            return;
+          }
+          selBandeja.value = savedBandeja;
+          cargarCajas(savedBandeja, function() {
+            if (savedCaja) {
+              selCaja.value = savedCaja;
+            }
+          });
+        });
+      }, false);
+    });
+  }
+});
+</script>
+
+<!-- ========== PANEL DE ACCIONES ========== -->
+<div class="collapsible" style="border-radius: 8px; overflow: hidden; margin-top: 15px;">
+    <button class="collapsible-header">⚙️ Acciones</button>
+    <div class="collapsible-content">
+      <div class="action-buttons" style="border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+
+        <div class="action-row">
+          {% if perms.muestras.can_add_localizaciones_web %}
+          <button type="button"
+              onclick="location.href='{% url 'crear_recurso_congelador' %}'"
+              class="btn">
+            ➕ Crear recurso
+          </button>
+          {% endif %}
+        </div>
+
+        <div class="action-row">
+          <button type="button" class="btn btn-success"
+              onclick="descargarConProgreso('{% url 'exportar_congeladores' %}', 'Exportando recursos')">
+            📊⬇ Exportar
+          </button>
+
+          <button type="button" class="btn btn-success" id="exportar_seleccionadas" disabled
+              onclick="exportarSeleccionadas()">
+            📊✅ Exportar seleccionadas
+          </button>
+
+          <button type="button" class="btn btn-success" id="exportar_libres" disabled
+              onclick="exportarPosicionesLibres()">
+            📊⬇ Exportar posiciones libres
+          </button>
+        </div>
+
+        <div class="action-row">
+          {% if perms.muestras.can_delete_localizaciones_web %}
+          <button type="button" class="btn btn-danger" id="eliminar-btn" disabled
+              onclick="eliminarPosicionesAjax()">
+            🗑 Eliminar posiciones
+          </button>
+          {% endif %}
+        </div>
+
+        <div class="action-row">
+          <input type="button" value="☑️ Seleccionar todo" onclick="seleccionarTodo()" class="btn btn-secondary">
+          <input type="button" value="☐ Deseleccionar" onclick="deseleccionarTodo()" class="btn btn-secondary">
+        </div>
+
+      </div>
+    </div>
+</div>
+
+<form action="{% url 'eliminar_localizacion' %}" method="post" id="eliminar-form">
+  {%csrf_token%}
+
+  <!-- Botón oculto para submit del formulario de eliminar -->
+  <button type="submit" id="eliminar-submit" name="eliminar" style="display:none;"></button>
+
+<div class="archivo-topbar">
+  <div class="resource-legend">
+    <span class="legend-item"><span class="legend-swatch legend-80"></span> Congelador -80</span>
+    <span class="legend-item"><span class="legend-swatch legend-20"></span> Congelador -20</span>
+    <span class="legend-item"><span class="legend-swatch legend-nevera"></span> Nevera</span>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  // ===================== OVERLAY DE PROGRESO =====================
+  function mostrarProgreso(texto) {
+    const prev = document.getElementById('progreso-overlay');
+    if (prev) prev.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'progreso-overlay';
+    overlay.innerHTML = `
+      <div class="progreso-popup">
+        <h2>${texto}</h2>
+        <div class="progreso-bar-wrapper">
+          <div class="progreso-bar" id="progreso-bar"></div>
+        </div>
+        <p class="progreso-info" id="progreso-txt"><span class="progreso-spinner"></span>Procesando...</p>
+        <p class="progreso-counter" id="progreso-cnt"></p>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+  }
+
+  function _actualizarBarraProgreso(current, total) {
+    const bar = document.getElementById('progreso-bar');
+    const txt = document.getElementById('progreso-txt');
+    const cnt = document.getElementById('progreso-cnt');
+    if (!bar) return;
+    const pct = total > 0 ? (current / total * 100) : 0;
+    bar.style.width = pct.toFixed(1) + '%';
+    bar.textContent = Math.round(pct) + '%';
+    if (txt) txt.innerHTML = '<span class="progreso-spinner"></span>Procesando registro ' + current + ' de ' + total;
+    if (cnt) cnt.textContent = current + ' / ' + total;
+  }
+
+  function cerrarProgreso(exito, mensaje) {
+    clearInterval(window._progresoInterval);
+    const bar = document.getElementById('progreso-bar');
+    const txt = document.getElementById('progreso-txt');
+    const cnt = document.getElementById('progreso-cnt');
+    const overlay = document.getElementById('progreso-overlay');
+    if (!bar || !overlay) return;
+    bar.style.width = '100%';
+    bar.textContent = '100%';
+    bar.classList.add(exito ? 'done' : 'error');
+    if (txt) txt.innerHTML = mensaje || 'Completado';
+    if (cnt) cnt.textContent = '';
+    setTimeout(() => {
+      overlay.style.transition = 'opacity 0.4s ease';
+      overlay.style.opacity = '0';
+      setTimeout(() => overlay.remove(), 400);
+    }, 800);
+  }
+
+  // Accion con progreso real via JSON streaming (no cambia de pagina)
+  async function accionConProgreso(url, formData, titulo) {
+    mostrarProgreso(titulo);
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-CSRFToken': formData.get('csrfmiddlewaretoken') }
+      });
+      const ct = response.headers.get('Content-Type') || '';
+      if (ct.includes('text/html')) { const html = await response.text(); document.open(); document.write(html); document.close(); return; }
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          try {
+            const data = JSON.parse(line);
+            if (data.status === 'processing' || data.status === 'start') {
+              _actualizarBarraProgreso(data.current, data.total);
+            } else if (data.status === 'done') {
+              _actualizarBarraProgreso(data.total, data.total);
+              cerrarProgreso(true, data.message || 'Completado');
+              setTimeout(() => { window.location.href = data.redirect || location.href; }, 900);
+              return;
+            } else if (data.status === 'error') {
+              cerrarProgreso(false, data.message || 'Error en el proceso');
+              return;
+            }
+          } catch(e) { /* linea no parseable, ignorar */ }
+        }
+      }
+      cerrarProgreso(true, 'Completado');
+      setTimeout(() => { window.location.href = location.href; }, 900);
+    } catch (err) {
+      cerrarProgreso(false, 'Error de conexion: ' + err.message);
+    }
+  }
+
+  function eliminarPosicionesAjax() {
+    const checkboxes = obtenerTodosCheckboxes();
+    const haySeleccionados = Array.from(checkboxes).some(cb => cb.checked);
+    if (!haySeleccionados) {
+      alert('Por favor selecciona al menos una posición');
+      return;
+    }
+    confirmarAccionApp({
+      title: 'Eliminar posiciones',
+      message: '¿Quieres eliminar las posiciones seleccionadas?',
+      confirmText: 'Eliminar'
+    }).then(function(confirmado) {
+      if (!confirmado) return;
+      const form = document.getElementById('eliminar-form');
+      const formData = new FormData(form);
+      formData.append('eliminar', 'true');
+      accionConProgreso(form.action, formData, 'Eliminando posiciones');
+    });
+  }
+
+  function descargarConProgreso(url, texto) {
+    mostrarProgreso(texto);
+    let width = 0;
+    const bar = document.getElementById('progreso-bar');
+    window._progresoInterval = setInterval(() => {
+      if (width < 85) {
+        width += Math.random() * 8 + 2;
+        if (width > 85) width = 85;
+        bar.style.width = width + '%';
+        bar.textContent = Math.round(width) + '%';
+      }
+    }, 400);
+    const separator = url.includes('?') ? '&' : '?';
+    const downloadUrl = url + separator + 'download_token=' + Date.now();
+    fetch(downloadUrl)
+      .then(response => {
+        if (!response.ok) throw new Error('Error en la descarga');
+        return response.blob().then(blob => ({ blob, response }));
+      })
+      .then(({ blob, response }) => {
+        const a = document.createElement('a');
+        const blobUrl = window.URL.createObjectURL(blob);
+        a.href = blobUrl;
+        const disposition = response.headers.get('Content-Disposition');
+        let filename = 'descarga.xlsx';
+        if (disposition) {
+          const match = disposition.match(/filename[^;=\n]*=(['"]?)([^'"\n]*)/i);
+          if (match && match[2]) filename = match[2];
+        }
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(blobUrl);
+        a.remove();
+        cerrarProgreso(true, 'Descarga completada');
+      })
+      .catch(() => {
+        cerrarProgreso(false, 'Error en la descarga');
+      });
+  }
+  function obtenerTodosCheckboxes() {
+    return document.querySelectorAll('input[type="checkbox"][name="congelador"], input[type="checkbox"][name="estante"], input[type="checkbox"][name="rack"], input[type="checkbox"][name="bandeja"], input[type="checkbox"][name="caja"], input[type="checkbox"][name="subposicion"]');
+  }
+
+  function seleccionarTodo() {
+    obtenerTodosCheckboxes().forEach(cb => cb.checked = true);
+    actualizarEstadoBotones();
+  }
+
+  function deseleccionarTodo() {
+    obtenerTodosCheckboxes().forEach(cb => cb.checked = false);
+    actualizarEstadoBotones();
+  }
+
+  function actualizarEstadoBotones() {
+    actualizarEstadoBotonEliminar();
+    actualizarEstadoBotonExportar();
+    actualizarEstadoBotonExportarSeleccionadas();
+  }
+
+  function actualizarEstadoBotonEliminar() {
+    const checkboxes = obtenerTodosCheckboxes();
+    const botonEliminar = document.getElementById('eliminar-btn');
+    const haySeleccionados = Array.from(checkboxes).some(cb => cb.checked);
+    botonEliminar.disabled = !haySeleccionados;
+  }
+
+  function actualizarEstadoBotonExportar() {
+    const checkboxesCongelador = document.querySelectorAll('input[type="checkbox"][name="congelador"]');
+    const botonExportar = document.getElementById('exportar_libres');
+    const hayCongeladorSeleccionado = Array.from(checkboxesCongelador).some(cb => cb.checked);
+    botonExportar.disabled = !hayCongeladorSeleccionado;
+  }
+
+  function actualizarEstadoBotonExportarSeleccionadas() {
+    const checkboxesCongelador = document.querySelectorAll('input[type="checkbox"][name="congelador"]');
+    const botonExportarSel = document.getElementById('exportar_seleccionadas');
+    const hayCongeladorSeleccionado = Array.from(checkboxesCongelador).some(cb => cb.checked);
+    botonExportarSel.disabled = !hayCongeladorSeleccionado;
+  }
+
+  function exportarPosicionesLibres() {
+    const checkboxesCongelador = document.querySelectorAll('input[type="checkbox"][name="congelador"]:checked');
+    const ids = Array.from(checkboxesCongelador).map(cb => cb.value);
+    if (ids.length === 0) return;
+    const params = ids.map(id => 'congelador=' + encodeURIComponent(id)).join('&');
+    descargarConProgreso('{% url "exportar_posiciones_libres" %}?' + params, 'Exportando posiciones libres');
+  }
+
+  function exportarSeleccionadas() {
+    const checkboxesCongelador = document.querySelectorAll('input[type="checkbox"][name="congelador"]:checked');
+    const ids = Array.from(checkboxesCongelador).map(cb => cb.value);
+    if (ids.length === 0) return;
+    const params = ids.map(id => 'congelador=' + encodeURIComponent(id)).join('&');
+    descargarConProgreso('{% url "exportar_congeladores_seleccionados" %}?' + params, 'Exportando recursos seleccionados');
+  }
+
+  function abrirNodoSiExiste(button) {
+    if (!button) return;
+    const targetList = button.parentElement.querySelector('ul');
+    if (!targetList) return;
+    if (targetList.style.display !== 'block') {
+      button.click();
+    }
+  }
+
+  function resaltarBotonDesdeCheckbox(checkbox, isDeepest = false) {
+    if (!checkbox) return;
+    const button = checkbox.parentElement.querySelector(':scope > button.dropbtn');
+    if (!button) return;
+    button.classList.add(isDeepest ? 'filter-highlight-deep' : 'filter-highlight');
+  }
+
+  function expandirJerarquiaFiltrada() {
+    const filtroRecurso = '{{ filtro_congelador|default:"" }}';
+    const filtroEstante = '{{ filtro_estante|default:"" }}';
+    const filtroRack = '{{ filtro_rack|default:"" }}';
+    const filtroCajon = '{{ filtro_cajon|default:"" }}';
+    const filtroBandeja = '{{ filtro_bandeja|default:"" }}';
+    const filtroCaja = '{{ filtro_caja|default:"" }}';
+
+    if (!filtroRecurso && !filtroEstante && !filtroRack && !filtroCajon && !filtroBandeja && !filtroCaja) {
+      return;
+    }
+
+    const recursoCheckbox = filtroRecurso
+      ? Array.from(document.querySelectorAll('input[name="congelador"]')).find(input => {
+          const resourceButton = input.parentElement.querySelector(':scope > button.dropbtn');
+          return resourceButton && resourceButton.textContent.includes(filtroRecurso);
+        })
+      : null;
+    const estanteCheckbox = filtroEstante
+      ? document.querySelector(`input[name="estante"][value="${filtroEstante}"]`)
+      : null;
+    const rackCheckbox = filtroRack
+      ? document.querySelector(`input[name="rack"][value="${filtroRack}"]`)
+      : null;
+    const cajonCheckbox = filtroCajon
+      ? document.querySelector(`input[name="rack"][value="${filtroCajon}"]`)
+      : null;
+    const bandejaCheckbox = filtroBandeja
+      ? document.querySelector(`input[name="bandeja"][value="${filtroBandeja}"]`)
+      : null;
+    const cajaCheckbox = filtroCaja
+      ? document.querySelector(`input[name="caja"][value="${filtroCaja}"]`)
+      : null;
+
+    const deepestCheckbox = cajaCheckbox || bandejaCheckbox || rackCheckbox || cajonCheckbox || estanteCheckbox || recursoCheckbox;
+    if (!deepestCheckbox) return;
+
+    [recursoCheckbox, estanteCheckbox, rackCheckbox, cajonCheckbox, bandejaCheckbox, cajaCheckbox]
+      .filter(Boolean)
+      .forEach(checkbox => resaltarBotonDesdeCheckbox(checkbox, checkbox === deepestCheckbox));
+
+    let currentLi = deepestCheckbox.closest('li');
+    while (currentLi) {
+      const parentLi = currentLi.parentElement ? currentLi.parentElement.closest('li') : null;
+      if (!parentLi) break;
+      const button = parentLi.querySelector(':scope > button.dropbtn');
+      abrirNodoSiExiste(button);
+      currentLi = parentLi;
+    }
+
+    if (cajaCheckbox) {
+      const cajaButton = cajaCheckbox.parentElement.querySelector('button.dropbtn[data-caja-id]');
+      if (cajaButton) {
+        const cajaId = cajaButton.dataset.cajaId;
+        const cajaList = cajaButton.parentElement.querySelector(`ul.muestras[data-caja-id="${cajaId}"]`);
+        if (cajaList && cajaList.style.display !== 'block') {
+          desplegarCaja(cajaButton, cajaId);
+        }
+      }
+    }
+  }
+
+  // Collapsible panels
+  document.addEventListener("DOMContentLoaded", function() {
+    const headers = document.querySelectorAll(".collapsible-header");
+    headers.forEach(header => {
+      header.addEventListener("click", function() {
+        const content = this.nextElementSibling;
+        this.classList.toggle("active");
+        if (content.style.maxHeight) {
+          content.style.maxHeight = null;
+          content.classList.remove("open");
+        } else {
+          content.style.maxHeight = content.scrollHeight + "px";
+          content.classList.add("open");
+        }
+      });
+    });
+
+    // Si hay filtros activos, abrir automáticamente el panel de Filtros
+    const hayFiltros = '{{ filtro_tipo }}' || '{{ filtro_congelador }}' || '{{ filtro_estante }}' || '{{ filtro_rack }}' || '{{ filtro_cajon }}' || '{{ filtro_bandeja }}' || '{{ filtro_caja }}';
+    if (hayFiltros) {
+      const filtrosHeader = headers[0]; // primer collapsible = Filtros
+      const filtrosContent = filtrosHeader.nextElementSibling;
+      filtrosHeader.classList.add("active");
+      filtrosContent.style.maxHeight = filtrosContent.scrollHeight + "px";
+      filtrosContent.classList.add("open");
+    }
+
+    // Listeners para checkboxes
+    const checkboxes = obtenerTodosCheckboxes();
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', actualizarEstadoBotones);
+    });
+
+    expandirJerarquiaFiltrada();
+  });
+</script>
+
+<style>
+  /* Overlay de progreso */
+  #progreso-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 99999;
+    animation: progresoFadeIn 0.3s ease;
+  }
+  @keyframes progresoFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes progresoSlideUp { from { opacity: 0; transform: translateY(30px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  .progreso-popup {
+    background: white; border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    padding: 36px 34px 30px; text-align: center;
+    max-width: 440px; width: 90%;
+    animation: progresoSlideUp 0.35s ease;
+  }
+  .progreso-popup h2 { color: #1a1a2e; margin-bottom: 22px; font-size: 18px; font-weight: 600; }
+  .progreso-bar-wrapper { background: #e9ecef; border-radius: 8px; height: 26px; overflow: hidden; margin-bottom: 10px; }
+  .progreso-bar {
+    background: linear-gradient(90deg, #4361ee, #3a0ca3); height: 100%; border-radius: 8px;
+    transition: width 0.3s ease; width: 0%;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 12px; font-weight: 700; min-width: 40px;
+  }
+  .progreso-bar.done { background: linear-gradient(90deg, #2dc653, #1b9e3e); }
+  .progreso-bar.error { background: linear-gradient(90deg, #e63946, #c1121f); }
+  .progreso-info { color: #555; font-size: 14px; margin-top: 10px; }
+  .progreso-counter { color: #888; font-size: 12px; margin-top: 5px; }
+  .progreso-spinner {
+    display: inline-block; width: 16px; height: 16px;
+    border: 2.5px solid #ddd; border-top-color: #4361ee; border-radius: 50%;
+    animation: progresoSpin 0.7s linear infinite; vertical-align: middle; margin-right: 6px;
+  }
+  @keyframes progresoSpin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 860px) {
+    .box-row-cells {
+      grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+      gap: 4px;
+    }
+
+    .box-visual-row {
+      grid-template-columns: 24px 1fr;
+      gap: 4px;
+    }
+
+    .box-row-label,
+    .box-cell-visual {
+      min-height: 38px;
+    }
+  }
+</style>
+
+{% if messages %}
+ {% for message in messages %}
+  <script>
+      Swal.fire({
+        title: '{{ message.tags|capfirst }}',
+        text: '{{ message|escapejs }}',
+        icon: '{{ message.tags }}',
+        confirmButtonText: 'Aceptar'
+      });
+  </script>
+ {%endfor%}
+{% endif %}
+<!-- Navegación jerárquica y desplegable de congeladores, estantes, racks, bandejas, cajas y muestras -->
+<nav id="archivo">
+  <ul class="congeladores">
+    {% for congelador in congeladores %}
+    <li> <a href = "{% url 'detalles_congelador' congelador.congelador %}" class="chip-detalle">Gestionar</a> <input type="checkbox" name="congelador" value = "{{congelador.id}}" class="form-control"><button type ="button" onclick = "desplegar(this,'estantes')" class="dropbtn resource-chip {% if congelador.tipo_estructura == 'congelador_80' %}resource-80{% elif congelador.tipo_estructura == 'congelador_20' %}resource-20{% elif congelador.tipo_estructura == 'nevera' %}resource-nevera{% endif %}" data-node-key="congelador-{{ congelador.id }}">Recurso {{congelador.congelador}}</button>  
+      <ul class="estantes">
+      {% for estante in congelador.estantes.all %}
+        <li><input type="checkbox" name="estante" value = "{{estante.id}}" class="form-control"><button type ="button" onclick = "desplegar(this,'racks')" class="dropbtn" data-node-key="estante-{{ estante.id }}">Estante {{ estante.numero }}</button>
+          <ul class="racks">
+          {% for rack in estante.racks.all %}
+            <li> <input type="checkbox" name="rack" value = "{{rack.id}}" class="form-control"><button type ="button" onclick = "desplegar(this,'{% if congelador.tipo_estructura == 'congelador_20' or congelador.tipo_estructura == 'nevera' %}cajas{% else %}bandejas{% endif %}')" class="dropbtn" data-node-key="rack-{{ rack.id }}">{% if congelador.tipo_estructura == 'congelador_20' or congelador.tipo_estructura == 'nevera' %}Caj&oacute;n {{ rack.numero }} - Posici&oacute;n dentro del estante: {{ rack.posicion_rack_estante }}{% else %}Rack {{ rack.numero }} - Posici&oacute;n dentro del estante: {{rack.posicion_rack_estante}}{% endif %}</button>
+              {% if congelador.tipo_estructura == 'congelador_20' or congelador.tipo_estructura == 'nevera' %}
+              <ul class="cajas">
+                {% for caja in rack.cajas.all %}
+                  <li> <input type="checkbox" name="caja" value = "{{caja.id}}" class="form-control"><button type ="button" onclick = "desplegarCaja(this, {{caja.id}})" class="dropbtn" data-caja-id="{{caja.id}}" data-node-key="caja-{{ caja.id }}">Caja {{ caja.numero }}<span class="chip">{{ caja.numero_muestras }} muestras</span></button>
+                    <ul class="muestras" data-caja-id="{{caja.id}}">
+                      <li class="loading-placeholder" style="color:#888; font-style:italic; padding:6px 0;">Haz clic para cargar las posiciones fila/columna...</li>
+                    </ul>
+                  </li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <ul class ="bandejas">
+                {% for bandeja in rack.bandejas.all %}
+                  <li><input type="checkbox" name="bandeja" value="{{ bandeja.id }}" class="form-control"><button type="button" onclick="desplegar(this,'cajas')" class="dropbtn" data-node-key="bandeja-{{ bandeja.id }}">Bandeja {{ bandeja.numero }} - Posici&oacute;n dentro del rack: {{ bandeja.posicion_bandeja_rack }}</button>
+                    <ul class="cajas">
+                      {% for caja in bandeja.cajas.all %}
+                        <li> <input type="checkbox" name="caja" value = "{{caja.id}}" class="form-control"><button type ="button" onclick = "desplegarCaja(this, {{caja.id}})" class="dropbtn" data-caja-id="{{caja.id}}" data-node-key="caja-{{ caja.id }}">Caja {{ caja.numero }} - Posici&oacute;n dentro de la bandeja: {{caja.posicion_caja_rack}}<span class="chip">{{ caja.numero_muestras }} muestras</span></button>
+                          <ul class="muestras" data-caja-id="{{caja.id}}">
+                            <li class="loading-placeholder" style="color:#888; font-style:italic; padding:6px 0;">Haz clic para cargar las posiciones fila/columna...</li>
+                          </ul>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  </li>
+                {% endfor %}
+              </ul>
+              {% endif %}
+            </li>
+          {% endfor %} 
+          </ul>
+        </li> 
+      {% endfor %} 
+      </ul>
+    {% endfor %}
+</nav>
+
+</form>
+{% endblock %}
+

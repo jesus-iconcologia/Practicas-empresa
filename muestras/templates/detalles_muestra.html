@@ -1,0 +1,227 @@
+{% extends "master.html" %}
+{% load static %}
+{% load muestras_filters %}
+
+{% block title %}
+Detalles de la Muestra
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+<style>
+    .location-summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+    }
+    .location-chip {
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #eef5fb;
+        border: 1px solid #d6e4f0;
+        color: #20486f;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    .box-visual {
+        margin-top: 16px;
+        border: 1px solid #d7e3ef;
+        border-radius: 14px;
+        padding: 14px;
+        background: #fbfdff;
+    }
+    .box-grid-header,
+    .box-grid-row {
+        display: grid;
+        grid-template-columns: 48px repeat(auto-fit, minmax(52px, 1fr));
+        gap: 6px;
+        align-items: center;
+    }
+    .box-grid-header {
+        margin-bottom: 6px;
+    }
+    .box-grid-row + .box-grid-row {
+        margin-top: 6px;
+    }
+    .box-corner,
+    .box-col-label,
+    .box-row-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #5b7287;
+        text-align: center;
+    }
+    .box-cell {
+        min-height: 48px;
+        border-radius: 10px;
+        border: 1px solid #d3dde7;
+        background: #f4f7fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        color: #57708a;
+    }
+    .box-cell.is-occupied {
+        background: #eef2f6;
+        color: #7d8b99;
+    }
+    .box-cell.is-current {
+        background: #dff4e4;
+        border-color: #73b88a;
+        color: #1f6a39;
+        box-shadow: inset 0 0 0 1px rgba(115, 184, 138, 0.24);
+    }
+</style>
+<div class="form-container">
+    <div class="acciones-estudios">
+        <a href="/muestras" class="accion-btn accion-secundaria">Volver a muestras</a>
+    </div>
+
+    <div class="form-header">
+        <h1>Detalles de la muestra</h1>
+        <p class="form-subtitle">Información alineada con los datos que se solicitan en el formulario de muestra.</p>
+    </div>
+
+    <div class="form-card">
+        <h2>Datos de la muestra</h2>
+        <div class="detalle-grid">
+            <p><strong>ID individuo:</strong> {{ muestra.id_individuo|default:"&mdash;" }}</p>
+            <p><strong>ID muestra:</strong> {{ muestra.nom_lab }}</p>
+            <p><strong>Material:</strong> {{ muestra.material|default:muestra.id_material|default:"&mdash;" }}</p>
+            <p><strong>Estudio asociado:</strong> {{ muestra.estudio|default:"&mdash;" }}</p>
+        </div>
+    </div>
+
+    {% if muestra.material %}
+    <div class="form-card">
+        <h2>Cantidades</h2>
+        <div class="detalle-grid">
+            {% if muestra.material.usa_volumen %}
+            <p>
+                <strong>Volumen actual:</strong>
+                {% if muestra.volumen_actual or muestra.unidad_volumen %}
+                    {{ muestra.volumen_actual }} {{ muestra.unidad_volumen }}
+                {% else %}
+                    &mdash;
+                {% endif %}
+            </p>
+            {% endif %}
+            {% if muestra.material.usa_concentracion %}
+            <p>
+                <strong>Concentración actual:</strong>
+                {% if muestra.concentracion_actual or muestra.unidad_concentracion %}
+                    {{ muestra.concentracion_actual }} {{ muestra.unidad_concentracion }}
+                {% else %}
+                    &mdash;
+                {% endif %}
+            </p>
+            {% endif %}
+            {% if muestra.material.usa_unidades_bloque %}
+            <p>
+                <strong>Cantidad actual:</strong>
+                {% if muestra.masa_actual or muestra.unidad_masa %}
+                    {{ muestra.masa_actual }} {{ muestra.unidad_masa }}
+                {% else %}
+                    &mdash;
+                {% endif %}
+            </p>
+            {% endif %}
+        </div>
+    </div>
+    {% elif muestra.volumen_actual or muestra.unidad_volumen or muestra.concentracion_actual or muestra.unidad_concentracion or muestra.masa_actual or muestra.unidad_masa %}
+    <div class="form-card">
+        <h2>Cantidades</h2>
+        <div class="detalle-grid">
+            {% if muestra.volumen_actual or muestra.unidad_volumen %}
+            <p><strong>Volumen actual:</strong> {{ muestra.volumen_actual }} {{ muestra.unidad_volumen }}</p>
+            {% endif %}
+            {% if muestra.concentracion_actual or muestra.unidad_concentracion %}
+            <p><strong>Concentración actual:</strong> {{ muestra.concentracion_actual }} {{ muestra.unidad_concentracion }}</p>
+            {% endif %}
+            {% if muestra.masa_actual or muestra.unidad_masa %}
+            <p><strong>Cantidad actual:</strong> {{ muestra.masa_actual }} {{ muestra.unidad_masa }}</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="form-card">
+        <h2>Fechas</h2>
+        <div class="detalle-grid">
+            <p><strong>Fecha de extracción:</strong> {{ muestra.fecha_extraccion|default:"&mdash;" }}</p>
+            <p><strong>Fecha de llegada:</strong> {{ muestra.fecha_llegada|default:"&mdash;" }}</p>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <h2>Estado</h2>
+        <div class="detalle-grid">
+            <p>
+                <strong>Estado actual:</strong>
+                <span class="estado-chip estado-{{ muestra.estado_actual|estado_badge_class }}">
+                    {{ muestra.estado_actual|estado_label|default:"&mdash;" }}
+                </span>
+            </p>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <h2>Procedencia</h2>
+        <div class="detalle-grid">
+            <p><strong>Centro de procedencia:</strong> {{ muestra.centro_procedencia|default:"&mdash;" }}</p>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <h2>Ubicación</h2>
+        {% if caja_layout %}
+            <p><strong>Ubicación actual:</strong></p>
+            <div class="location-summary">
+                <span class="location-chip">Congelador {{ caja_layout.congelador }}</span>
+                <span class="location-chip">Estante {{ caja_layout.estante }}</span>
+                <span class="location-chip">Rack {{ caja_layout.rack }}</span>
+                {% if caja_layout.bandeja %}<span class="location-chip">Bandeja {{ caja_layout.bandeja }}</span>{% endif %}
+                <span class="location-chip">Caja {{ caja_layout.caja }}</span>
+                <span class="location-chip">Fila {{ caja_layout.fila }}</span>
+                <span class="location-chip">Columna {{ caja_layout.columna }}</span>
+            </div>
+
+            <div class="box-visual">
+                <p style="margin-top:0;"><strong>Vista de la caja</strong></p>
+                <div class="box-grid-header">
+                    <div class="box-corner"></div>
+                    {% for columna in caja_layout.columnas %}
+                        <div class="box-col-label">{{ columna }}</div>
+                    {% endfor %}
+                </div>
+                {% for row in caja_layout.grid_rows %}
+                    <div class="box-grid-row">
+                        <div class="box-row-label">{{ row.fila }}</div>
+                        {% for cell in row.cells %}
+                            <div class="box-cell{% if cell.ocupada %} is-occupied{% endif %}{% if cell.es_muestra_actual %} is-current{% endif %}">
+                                {% if cell.es_muestra_actual %}
+                                    {{ muestra.nom_lab }}
+                                {% elif cell.ocupada %}
+                                    Ocupada
+                                {% else %}
+                                    Libre
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p><strong>Ubicación actual:</strong> {{ localizacion_actual|default:"&mdash;" }}</p>
+        {% endif %}
+    </div>
+
+    <div class="form-card">
+        <h2>Observaciones</h2>
+        <p class="wrap-text">{{ muestra.observaciones|default:"&mdash;" }}</p>
+    </div>
+</div>
+{% endblock %}

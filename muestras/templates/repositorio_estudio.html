@@ -1,0 +1,480 @@
+{% extends "master.html" %}
+{% load static %}
+{% load muestras_filters %}
+
+{% block title %}
+Repositorio de documentacion del estudio {{ estudio.nombre_estudio }}
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/muestras_todas.css' %}">
+<style>
+  .multiselect-wrapper {
+    position: relative;
+    width: 100%;
+  }
+  .multiselect-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 40px;
+    padding: 8px 12px;
+    border: 1px solid #cfd8e3;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    box-sizing: border-box;
+    user-select: none;
+  }
+  .multiselect-dropdown {
+    display: none;
+    position: absolute;
+    z-index: 1000;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-height: 180px;
+    overflow-y: auto;
+    width: 100%;
+  }
+  .multiselect-wrapper.open .multiselect-dropdown {
+    display: block;
+  }
+  .multiselect-dropdown label {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 12px;
+    gap: 5px;
+    line-height: 1.2;
+  }
+  .multiselect-dropdown label:hover {
+    background: #f0f4ff;
+  }
+  .multiselect-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    flex: 1;
+  }
+  .multiselect-tag {
+    background: #e0e7ff;
+    color: #1a3d7c;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+  }
+  .multiselect-placeholder {
+    color: #999;
+  }
+  .filter-panel {
+    padding: 14px 0 6px;
+  }
+  .filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 18px 22px;
+    margin-bottom: 14px;
+  }
+  .filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+  .filter-field label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a3d7c;
+    line-height: 1.25;
+  }
+  .filter-field input[type="text"],
+  .filter-field .multiselect-toggle {
+    width: 100%;
+  }
+  .filter-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .busqueda-documentos {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .busqueda-documentos input {
+    padding: 8px 12px;
+    border: 1px solid #dfe3e6;
+    border-radius: 6px;
+    font-size: 14px;
+    width: 300px;
+    max-width: 100%;
+  }
+  .icon-col {
+    width: 90px;
+    min-width: 90px;
+    text-align: center !important;
+  }
+  .icon-cell {
+    text-align: center !important;
+    vertical-align: middle !important;
+  }
+  .icon-cell .chip-detalle {
+    min-width: 72px;
+    justify-content: center;
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+  .pagination-card {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  .pagination-links {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .action-buttons button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+</style>
+
+<div class="form-container">
+  <div class="acciones-estudios">
+    <a href="/estudios" class="accion-btn accion-secundaria">Volver a estudios</a>
+  </div>
+
+  <div class="form-header">
+    <h1>Documentacion del estudio {{ estudio.nombre_estudio }}</h1>
+    <p class="form-subtitle">Repositorio de archivos asociados a este estudio.</p>
+  </div>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="message {{ message.tags }}" style="margin: 12px 0; padding: 10px 12px; border-radius: 6px; background: #eef5fb; color: #1a3d7c;">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="collapsible">
+    <button class="collapsible-header">&#128269; Filtros</button>
+    <div class="collapsible-content">
+      <div class="filter-panel">
+        <form method="get" class="styled-form">
+          <div class="filter-grid">
+            <div class="filter-field">
+              <label for="categoria">Categoria</label>
+              <input type="text" name="categoria" id="categoria" value="{{ request.GET.categoria|default:'' }}">
+            </div>
+            <div class="filter-field">
+              <label for="usuario">Usuario</label>
+              <div class="multiselect-wrapper" data-name="usuario">
+                <input type="hidden" name="usuario" value="">
+                <div class="multiselect-toggle">
+                  <span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span>
+                  <span>v</span>
+                </div>
+                <div class="multiselect-dropdown">
+                  {% for user in usuarios %}
+                    <label><input type="checkbox" value="{{ user.username }}"> {{ user.username }}</label>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-buttons">
+            <button type="submit" class="btn btn-primary">&#128270; Filtrar</button>
+            <a href="/estudios/{{ id }}" class="btn btn-secondary">&#10006; Eliminar filtros</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="collapsible" style="border-radius: 8px; overflow: hidden; margin-top: 15px;">
+    <button class="collapsible-header">&#9881;&#65039; Acciones</button>
+    <div class="collapsible-content">
+      <div class="action-buttons" style="border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+        <div class="action-row">
+          <a href="/estudios/{{ id }}/subir" class="btn">&#10133; Subir documento</a>
+        </div>
+        <div class="action-row">
+          <button type="submit" form="form-documentos-tabla" formaction="{% url 'descargar_documentos_seleccionados' %}" class="btn btn-success" id="download-button" disabled>&#128229; Descargar seleccionados</button>
+        </div>
+        <div class="action-row">
+          <button type="submit" form="form-documentos-tabla" class="btn btn-danger" id="delete-button" disabled>&#128465; Eliminar seleccionados</button>
+        </div>
+        <div class="action-row">
+          <input type="button" value="&#9745; Seleccionar todo" id="select-all" class="btn btn-secondary">
+          <input type="button" value="&#9744; Deseleccionar" id="clear-all" class="btn btn-secondary">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <form action="{% url 'eliminar_documento' %}" method="post" id="form-documentos-tabla">
+    {% csrf_token %}
+    <input type="hidden" name="id_estudio" value="{{ id }}">
+
+    <div class="table-container" style="margin-top: 16px;">
+      <div class="busqueda-documentos">
+        <label for="busqueda-input" style="font-weight: 500; color: #333;">Buscar:</label>
+        <input type="text" id="busqueda-input" value="{{ busqueda|default:'' }}" placeholder="Escribe para buscar en los documentos...">
+        <button type="button" onclick="ejecutarBusqueda()" class="btn btn-secondary">Buscar</button>
+        {% if busqueda %}
+          <button type="button" onclick="limpiarBusqueda()" class="btn btn-secondary">Limpiar busqueda</button>
+        {% endif %}
+      </div>
+
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th class="icon-col"></th>
+            <th class="icon-col">Accion</th>
+            <th>Archivo</th>
+            <th>Fecha de subida</th>
+            <th>Categoria</th>
+            <th>Subido por</th>
+            <th>Descripcion</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for doc in documentos %}
+            <tr>
+              <td class="icon-cell"><input type="checkbox" name="doc_id" value="{{ doc.id }}"></td>
+              <td class="icon-cell">
+                <a href="/estudios/{{ id }}/{{ doc.id }}" class="chip-detalle" title="Descargar archivo" aria-label="Descargar archivo">Descargar</a>
+              </td>
+              <td>{{ doc.archivo.name|basename }}</td>
+              <td data-sort="{{ doc.fecha_subida|date:'Y-m-d H:i:s'|default:'' }}">{{ doc.fecha_subida }}</td>
+              <td>{{ doc.categoria }}</td>
+              <td>{{ doc.usuario_subida.username }}</td>
+              <td class="wrap-text">{{ doc.descripcion }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7" style="text-align: center;">No hay documentos cargados en este estudio.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </form>
+</div>
+
+<div class="pagination-card">
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <label for="items-por-pagina" style="font-weight: 600; color: #333;">Items por pagina:</label>
+    <form method="GET" style="display: inline; margin: 0;">
+      {% for key, value in request.GET.items %}
+        {% if key != 'items_por_pagina' and key != 'page' %}
+          <input type="hidden" name="{{ key }}" value="{{ value }}">
+        {% endif %}
+      {% endfor %}
+      <select name="items_por_pagina" id="items-por-pagina" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" onchange="this.form.submit();">
+        <option value="10" {% if items_por_pagina == 10 %}selected{% endif %}>10</option>
+        <option value="25" {% if items_por_pagina == 25 %}selected{% endif %}>25</option>
+        <option value="50" {% if items_por_pagina == 50 %}selected{% endif %}>50</option>
+        <option value="100" {% if items_por_pagina == 100 %}selected{% endif %}>100</option>
+        <option value="todas" {% if items_por_pagina == 'todas' %}selected{% endif %}>Todas</option>
+      </select>
+    </form>
+  </div>
+
+  <div style="font-weight: 600; color: #333;">
+    Pagina {{ muestras_page.number }} de {{ paginator.num_pages }} | Total: {{ contador_muestras }} documento{{ contador_muestras|pluralize }}
+  </div>
+
+  <div class="pagination-links">
+    {% if muestras_page.has_previous %}
+      <a href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;">Primera</a>
+      <a href="?page={{ muestras_page.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;">Anterior</a>
+    {% else %}
+      <button class="btn btn-secondary" disabled style="padding: 8px 12px; font-size: 12px; opacity: 0.5;">Primera</button>
+      <button class="btn btn-secondary" disabled style="padding: 8px 12px; font-size: 12px; opacity: 0.5;">Anterior</button>
+    {% endif %}
+
+    <div style="display: flex; gap: 4px; align-items: center;">
+      {% for num in paginator.page_range %}
+        {% if num == muestras_page.number %}
+          <span style="padding: 6px 10px; background: #1a3d7c; color: white; border-radius: 4px; font-weight: 600;">{{ num }}</span>
+        {% elif num > muestras_page.number|add:'-3' and num < muestras_page.number|add:'3' %}
+          <a href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #1a3d7c; background: white;">{{ num }}</a>
+        {% elif num == 1 or num == paginator.num_pages %}
+          <a href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #1a3d7c; background: white;">{{ num }}</a>
+        {% elif num == muestras_page.number|add:'-3' or num == muestras_page.number|add:'3' %}
+          <span style="padding: 0 4px;">...</span>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    {% if muestras_page.has_next %}
+      <a href="?page={{ muestras_page.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;">Siguiente</a>
+      <a href="?page={{ paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;">Ultima</a>
+    {% else %}
+      <button class="btn btn-secondary" disabled style="padding: 8px 12px; font-size: 12px; opacity: 0.5;">Siguiente</button>
+      <button class="btn btn-secondary" disabled style="padding: 8px 12px; font-size: 12px; opacity: 0.5;">Ultima</button>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+function ejecutarBusqueda() {
+  const texto = document.getElementById('busqueda-input').value.trim();
+  const params = new URLSearchParams(window.location.search);
+  if (texto) params.set('busqueda', texto);
+  else params.delete('busqueda');
+  params.delete('page');
+  window.location.href = window.location.pathname + '?' + params.toString();
+}
+
+function limpiarBusqueda() {
+  const params = new URLSearchParams(window.location.search);
+  params.delete('busqueda');
+  params.delete('page');
+  window.location.href = window.location.pathname + '?' + params.toString();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const params = new URLSearchParams(window.location.search);
+  const collapsibleHeaders = document.querySelectorAll('.collapsible-header');
+  collapsibleHeaders.forEach(function(header) {
+    header.addEventListener('click', function() {
+      const content = this.nextElementSibling;
+      this.classList.toggle('active');
+      if (content.style.maxHeight) {
+        content.style.maxHeight = null;
+        content.classList.remove('open');
+      } else {
+        content.style.maxHeight = content.scrollHeight + 'px';
+        content.classList.add('open');
+      }
+    });
+  });
+
+  document.querySelectorAll('.multiselect-wrapper').forEach(function(wrapper) {
+    const name = wrapper.getAttribute('data-name');
+    const toggle = wrapper.querySelector('.multiselect-toggle');
+    const dropdown = wrapper.querySelector('.multiselect-dropdown');
+    const hiddenInput = wrapper.querySelector('input[type="hidden"]');
+    const tagsContainer = wrapper.querySelector('.multiselect-tags');
+    const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
+    const currentVal = params.get(name) || '';
+
+    if (currentVal) {
+      const vals = currentVal.split(';');
+      checkboxes.forEach(function(cb) {
+        if (vals.indexOf(cb.value) !== -1) cb.checked = true;
+      });
+      hiddenInput.value = currentVal;
+    }
+
+    function renderTags() {
+      const selected = [];
+      checkboxes.forEach(function(cb) {
+        if (cb.checked) selected.push(cb.value);
+      });
+      tagsContainer.innerHTML = '';
+      if (selected.length === 0) {
+        tagsContainer.innerHTML = '<span class="multiselect-placeholder">Seleccionar...</span>';
+      } else {
+        selected.forEach(function(item) {
+          const tag = document.createElement('span');
+          tag.className = 'multiselect-tag';
+          tag.textContent = item;
+          tagsContainer.appendChild(tag);
+        });
+      }
+    }
+
+    function updateValue() {
+      const vals = [];
+      checkboxes.forEach(function(cb) { if (cb.checked) vals.push(cb.value); });
+      hiddenInput.value = vals.join(';');
+      renderTags();
+    }
+
+    toggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      wrapper.classList.toggle('open');
+    });
+
+    checkboxes.forEach(function(cb) {
+      cb.addEventListener('change', updateValue);
+    });
+
+    renderTags();
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.multiselect-wrapper')) {
+      document.querySelectorAll('.multiselect-wrapper.open').forEach(function(w) {
+        w.classList.remove('open');
+      });
+    }
+  });
+
+  const checkboxes = Array.from(document.querySelectorAll('input[name="doc_id"]'));
+  const form = document.getElementById('form-documentos-tabla');
+  const deleteButton = document.getElementById('delete-button');
+  const downloadButton = document.getElementById('download-button');
+  const selectAllButton = document.getElementById('select-all');
+  const clearAllButton = document.getElementById('clear-all');
+
+  function updateActionButtons() {
+    const hasSelection = checkboxes.some(function(cb) { return cb.checked; });
+    deleteButton.disabled = !hasSelection;
+    downloadButton.disabled = !hasSelection;
+  }
+
+  checkboxes.forEach(function(checkbox) {
+    checkbox.addEventListener('change', updateActionButtons);
+  });
+
+  if (selectAllButton) {
+    selectAllButton.addEventListener('click', function() {
+      checkboxes.forEach(function(cb) { cb.checked = true; });
+      updateActionButtons();
+    });
+  }
+
+  if (clearAllButton) {
+    clearAllButton.addEventListener('click', function() {
+      checkboxes.forEach(function(cb) { cb.checked = false; });
+      updateActionButtons();
+    });
+  }
+
+  if (form) {
+    form.addEventListener('submit', function(event) {
+      const hasSelection = checkboxes.some(function(cb) { return cb.checked; });
+      if (!hasSelection) {
+        event.preventDefault();
+      }
+    });
+  }
+
+  updateActionButtons();
+});
+</script>
+{% endblock %}

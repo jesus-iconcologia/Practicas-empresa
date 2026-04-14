@@ -1,0 +1,124 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}
+Confirmación subida excel materiales
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+
+<div class="form-container">
+    <div class="form-header">
+        {% if numero_errores_bloqueantes > 0 %}
+        <h1>❌ Problemas con la subida del Excel de materiales</h1>
+        {% elif tiene_columnas_extras %}
+        <h1>⚠️ Confirmación de subida de Excel de materiales</h1>
+        {% else %}
+        <h1>✅ Confirmación de subida de Excel de materiales</h1>
+        {% endif %}
+    </div>
+
+    {% if messages %}
+    <div class="form-card messages-card">
+        <h2>📢 Mensajes</h2>
+        {% for message in messages %}
+            <p class="message-item {{ message.tags }}">{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if numero_errores_bloqueantes > 0 or tiene_columnas_extras %}
+    <div class="form-card info-card">
+        <h2>ℹ️ Resultado de la validación del Excel</h2>
+        <p>
+            Se ha generado un archivo Excel donde se marcan las filas del archivo original que contienen errores bloqueantes.
+        </p>
+        <ul class="requirements-list">
+            <li>
+                <strong style="color:#d32f2f;">Filas en rojo</strong>:
+                materiales ya existentes, duplicados dentro del Excel, campos obligatorios vacíos o valores inválidos.
+            </li>
+            {% if tiene_columnas_extras %}
+            <li>
+                Se han detectado columnas extra. No impiden la carga si el resto es correcto, pero conviene revisarlas.
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <div class="form-card">
+        <h2>📄 Excel con errores</h2>
+        <form method="post">
+            {% csrf_token %}
+            <button name="excel_errores" type="submit" class="accion-btn accion-secundaria">
+                ⬇️ Descargar Excel con errores
+            </button>
+        </form>
+        <p style="margin-bottom: 15px;">
+            Una vez corregidos los errores, puede volver a subir el archivo Excel.
+        </p>
+        <p class="note warning">
+            ⚠️ El Excel de errores <strong>no debe subirse directamente</strong> para crear los materiales.
+        </p>
+    </div>
+    {% endif %}
+
+    <div class="form-card">
+        <h2>📤 Importar otro archivo Excel</h2>
+        <form method="post" enctype="multipart/form-data" class="styled-form">
+            {% csrf_token %}
+            <div class="form-field">
+                <label for="id_excel_file">
+                    Excel file <span class="required">*</span>
+                </label>
+                <input type="file" name="excel_file" accept=".xlsx,.xlsm,.xls" required id="id_excel_file">
+                <small class="error-text" style="display: block; color: #dc3545; margin-top: 5px;">Este campo es obligatorio.</small>
+            </div>
+            <div class="form-actions">
+                <button name="upload_excel" id="upload-button" type="submit" class="accion-btn accion-primaria" disabled>
+                    ⬆️ Importar Excel
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {% if numero_errores_bloqueantes == 0 %}
+    <div class="form-card confirm-card">
+        <h2>❓ Confirmación</h2>
+        <p>¿Desea crear los materiales válidos del archivo Excel?</p>
+        <form method="post" class="form-actions">
+            {% csrf_token %}
+            <button type="submit" name="confirmar" class="accion-btn accion-primaria">
+                🧬 Confirmar creación de materiales
+            </button>
+            <button type="submit" name="cancelar" class="accion-btn accion-peligro">
+                ❌ Cancelar
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
+    <div class="form-actions">
+        <a href="{% url 'materiales_todos' %}" class="accion-btn accion-secundaria">
+            ↩ Volver a materiales
+        </a>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const fileInput = document.querySelector('input[name="excel_file"]');
+    const uploadButton = document.getElementById('upload-button');
+
+    function toggleUploadButton() {
+        if (uploadButton) uploadButton.disabled = !fileInput || !fileInput.files.length;
+    }
+
+    if (fileInput) {
+        fileInput.addEventListener('change', toggleUploadButton);
+        toggleUploadButton();
+    }
+});
+</script>
+{% endblock %}

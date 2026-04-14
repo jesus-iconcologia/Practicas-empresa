@@ -1,0 +1,410 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}
+Confirmacion de la subida del excel de localizaciones
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+<div class="form-container">
+    <div class="form-header">
+        {% if errores_encontrados %}
+            <h1>Problemas con la subida del Excel de localizaciones</h1>
+        {% else %}
+            <h1>Confirmacion de subida de Excel de localizaciones</h1>
+        {% endif %}
+    </div>
+
+    {% if congelador %}
+        <div class="form-card info-card">
+            <h2>Recurso</h2>
+            <p><strong>Nombre:</strong> {{ congelador.congelador }}</p>
+            <p><strong>Estructura:</strong> {{ estructura_label }}</p>
+        </div>
+    {% endif %}
+
+    {% if messages %}
+    <div class="form-card messages-card">
+        <h2>Mensajes</h2>
+        {% for message in messages %}
+            <p class="message-item {{ message.tags }}">{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if errores_encontrados %}
+    <div class="form-card info-card">
+        <h2>Resultado de la validacion del Excel</h2>
+        <p>Se ha generado un archivo Excel donde se indican las filas del archivo original que contienen errores.</p>
+        <ul class="requirements-list">
+            <li><strong style="color:#d32f2f;">Filas en rojo</strong>: errores que es necesario corregir antes de importar.</li>
+        </ul>
+    </div>
+
+    <div class="form-card">
+        <h2>Excel con errores</h2>
+        <form method="post">
+            {% csrf_token %}
+            {% if congelador %}
+                <input type="hidden" name="congelador_id" value="{{ congelador.id }}">
+            {% endif %}
+            <button name="excel_errores" type="submit" class="accion-btn accion-secundaria">
+                Descargar Excel con errores
+            </button>
+        </form>
+        <p style="margin-bottom: 15px; margin-top: 15px;">Una vez corregidos los errores, vuelva a subir el archivo Excel.</p>
+        <p class="note warning">El Excel de errores no debe subirse directamente para crear las localizaciones.</p>
+    </div>
+
+    <div class="form-card">
+        <h2>Importar otro archivo Excel</h2>
+        <form method="post" enctype="multipart/form-data" class="styled-form">
+            {% csrf_token %}
+            {% if congelador %}
+                <input type="hidden" name="congelador_id" value="{{ congelador.id }}">
+            {% endif %}
+            <div class="form-field">
+                <label for="id_excel_file">Excel file <span class="required">*</span></label>
+                <input type="file" name="excel_file" accept=".xlsx,.xlsm,.xls" required id="id_excel_file">
+                <small class="error-text" style="display: block; color: #dc3545; margin-top: 5px;">Este campo es obligatorio.</small>
+            </div>
+
+            <div class="form-actions">
+                <button name="upload_excel" id="upload-button" type="submit" class="accion-btn accion-primaria" disabled>
+                    Importar Excel
+                </button>
+            </div>
+        </form>
+    </div>
+    {% else %}
+    {% if preview_recurso %}
+    <div class="form-card info-card preview-card">
+        <h2>Vista previa de la estructura que se va a crear</h2>
+        <p class="preview-subtitle">Revise la jerarquia detectada antes de confirmar la importacion.</p>
+
+        <div class="preview-resource-line">
+            <span class="preview-node preview-resource">Recurso {{ preview_recurso.congelador }}</span>
+            <span class="preview-summary">
+                <span class="preview-summary-chip">{{ preview_recurso.summary_total_posiciones }} posiciones</span>
+                <span class="preview-summary-chip">{{ preview_recurso.summary_cajas }} cajas</span>
+            </span>
+        </div>
+
+        <ul class="preview-tree">
+            {% for estante in preview_recurso.estantes %}
+            <li>
+                <span class="preview-node preview-estante">Estante {{ estante.numero }}</span>
+                <ul>
+                    {% for rack in estante.racks %}
+                    <li>
+                        <span class="preview-node preview-rack">
+                            {% if preview_recurso.simple_structure %}
+                                Cajon {{ rack.numero }} - Posicion dentro del estante: {{ rack.posicion_rack_estante }}
+                            {% else %}
+                                Rack {{ rack.numero }} - Posicion dentro del estante: {{ rack.posicion_rack_estante }}
+                            {% endif %}
+                        </span>
+                        <span class="preview-inline-chip">{{ rack.numero_cajas }} cajas</span>
+                        {% if not preview_recurso.simple_structure %}
+                        <ul>
+                            {% for bandeja in rack.bandejas %}
+                            <li>
+                                <span class="preview-node preview-bandeja">
+                                    Bandeja {{ bandeja.numero }} - Posicion dentro del rack: {{ bandeja.posicion_bandeja_rack }}
+                                </span>
+                                <span class="preview-inline-chip">{{ bandeja.numero_cajas }} cajas</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </li>
+            {% endfor %}
+        </ul>
+        <p class="note" style="margin-top: 12px;">La vista previa resume la estructura que se va a crear, sin mostrar las subposiciones internas de las cajas.</p>
+    </div>
+    {% endif %}
+
+    <div class="form-card confirm-card">
+        <h2>Confirmacion</h2>
+        <p>¿Desea añadir las filas validas del archivo Excel?</p>
+
+        <form method="post" class="form-actions">
+            {% csrf_token %}
+            {% if congelador %}
+                <input type="hidden" name="congelador_id" value="{{ congelador.id }}">
+            {% endif %}
+
+            <button type="submit" name="confirmar" class="accion-btn accion-primaria">
+                Confirmar creacion de localizaciones
+            </button>
+
+            <button type="submit" name="cancelar" class="accion-btn accion-peligro">
+                Cancelar
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
+    <div class="form-actions">
+        {% if congelador %}
+            <a href="{% url 'detalles_congelador' congelador.congelador %}" class="accion-btn accion-secundaria">
+                Volver a gestionar
+            </a>
+        {% else %}
+            <a href="/archivo" class="accion-btn accion-secundaria">
+                Volver a la vista de recursos
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+  .preview-card {
+    overflow: hidden;
+  }
+  .preview-subtitle {
+    margin-top: 0;
+    color: #4c6481;
+  }
+  .preview-resource-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .preview-summary {
+    display: inline-flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .preview-summary-chip,
+  .preview-inline-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #f3f7fb;
+    border: 1px solid #d6e2ee;
+    color: #35506d;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .preview-tree,
+  .preview-tree ul {
+    list-style: none;
+    margin: 0;
+    padding-left: 22px;
+  }
+  .preview-tree {
+    padding-left: 0;
+  }
+  .preview-tree li {
+    position: relative;
+    margin: 10px 0;
+  }
+  .preview-tree ul li::before {
+    content: '';
+    position: absolute;
+    left: -14px;
+    top: -8px;
+    bottom: 16px;
+    width: 1px;
+    background: #d8e3ef;
+  }
+  .preview-tree ul li::after {
+    content: '';
+    position: absolute;
+    left: -14px;
+    top: 18px;
+    width: 10px;
+    height: 1px;
+    background: #d8e3ef;
+  }
+  .preview-node {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid #d5e1ee;
+    background: linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
+    color: #173a63;
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .preview-resource {
+    background: rgba(111, 183, 255, 0.18);
+    border-color: #93bee8;
+  }
+  .preview-estante {
+    background: rgba(255, 245, 232, 0.9);
+    border-color: #e6c9a2;
+  }
+  .preview-rack {
+    background: rgba(232, 241, 255, 0.9);
+    border-color: #bdd2ef;
+  }
+  .preview-bandeja {
+    background: rgba(240, 246, 255, 0.95);
+    border-color: #c7d8f1;
+  }
+  #progreso-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 99999;
+    animation: progresoFadeIn 0.3s ease;
+  }
+  @keyframes progresoFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes progresoSlideUp { from { opacity: 0; transform: translateY(30px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  .progreso-popup {
+    background: white; border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    padding: 36px 34px 30px; text-align: center;
+    max-width: 440px; width: 90%;
+    animation: progresoSlideUp 0.35s ease;
+  }
+  .progreso-popup h2 { color: #1a1a2e; margin-bottom: 22px; font-size: 18px; font-weight: 600; }
+  .progreso-bar-wrapper { background: #e9ecef; border-radius: 8px; height: 26px; overflow: hidden; margin-bottom: 10px; }
+  .progreso-bar {
+    background: linear-gradient(90deg, #4361ee, #3a0ca3); height: 100%; border-radius: 8px;
+    transition: width 0.3s ease; width: 0%;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 12px; font-weight: 700; min-width: 40px;
+  }
+  .progreso-bar.done { background: linear-gradient(90deg, #2dc653, #1b9e3e); }
+  .progreso-bar.error { background: linear-gradient(90deg, #e63946, #c1121f); }
+  .progreso-info { color: #555; font-size: 14px; margin-top: 10px; }
+  .progreso-counter { color: #888; font-size: 12px; margin-top: 5px; }
+  .progreso-spinner {
+    display: inline-block; width: 16px; height: 16px;
+    border: 2.5px solid #ddd; border-top-color: #4361ee; border-radius: 50%;
+    animation: progresoSpin 0.7s linear infinite; vertical-align: middle; margin-right: 6px;
+  }
+  @keyframes progresoSpin { to { transform: rotate(360deg); } }
+</style>
+
+<script>
+function mostrarProgreso(texto) {
+    const prev = document.getElementById('progreso-overlay');
+    if (prev) prev.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'progreso-overlay';
+    overlay.innerHTML = `
+      <div class="progreso-popup">
+        <h2>${texto}</h2>
+        <div class="progreso-bar-wrapper">
+          <div class="progreso-bar" id="progreso-bar"></div>
+        </div>
+        <p class="progreso-info" id="progreso-txt"><span class="progreso-spinner"></span>Procesando...</p>
+        <p class="progreso-counter" id="progreso-cnt"></p>
+      </div>`;
+    document.body.appendChild(overlay);
+}
+function _actualizarBarraProgreso(current, total) {
+    const bar = document.getElementById('progreso-bar');
+    const txt = document.getElementById('progreso-txt');
+    const cnt = document.getElementById('progreso-cnt');
+    if (!bar) return;
+    const pct = total > 0 ? (current / total * 100) : 0;
+    bar.style.width = pct.toFixed(1) + '%';
+    bar.textContent = Math.round(pct) + '%';
+    if (txt) txt.innerHTML = '<span class="progreso-spinner"></span>Procesando registro ' + current + ' de ' + total;
+    if (cnt) cnt.textContent = current + ' / ' + total;
+}
+function cerrarProgreso(exito, mensaje) {
+    const bar = document.getElementById('progreso-bar');
+    const txt = document.getElementById('progreso-txt');
+    const cnt = document.getElementById('progreso-cnt');
+    const overlay = document.getElementById('progreso-overlay');
+    if (!bar || !overlay) return;
+    bar.style.width = '100%';
+    bar.textContent = '100%';
+    bar.classList.add(exito ? 'done' : 'error');
+    if (txt) txt.innerHTML = mensaje || 'Completado';
+    if (cnt) cnt.textContent = '';
+    setTimeout(() => { overlay.style.transition = 'opacity 0.4s ease'; overlay.style.opacity = '0'; setTimeout(() => overlay.remove(), 400); }, 800);
+}
+async function accionConProgreso(url, formData, titulo) {
+    mostrarProgreso(titulo);
+    try {
+        const response = await fetch(url, { method: 'POST', body: formData, headers: { 'X-CSRFToken': formData.get('csrfmiddlewaretoken') } });
+        const ct = response.headers.get('Content-Type') || '';
+        if (ct.includes('text/html')) { const html = await response.text(); document.open(); document.write(html); document.close(); return; }
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop();
+            for (const line of lines) {
+                if (!line.trim()) continue;
+                try {
+                    const data = JSON.parse(line);
+                    if (data.status === 'processing' || data.status === 'start') {
+                        _actualizarBarraProgreso(data.current, data.total);
+                    } else if (data.status === 'done') {
+                        _actualizarBarraProgreso(data.total, data.total);
+                        cerrarProgreso(true, data.message || 'Completado');
+                        setTimeout(() => { window.location.href = data.redirect || location.href; }, 900);
+                        return;
+                    } else if (data.status === 'error') {
+                        cerrarProgreso(false, data.message || 'Error en el proceso');
+                        return;
+                    }
+                } catch (e) {}
+            }
+        }
+        cerrarProgreso(true, 'Completado');
+        setTimeout(() => { window.location.href = location.href; }, 900);
+    } catch (err) {
+        cerrarProgreso(false, 'Error de conexion: ' + err.message);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    const fileInput = document.querySelector('input[name="excel_file"]') || document.querySelector('input[type="file"]');
+    const uploadButton = document.getElementById('upload-button');
+
+    function toggleUploadButton() {
+        if (!fileInput || !uploadButton) return;
+        uploadButton.disabled = !fileInput.files.length;
+    }
+    if (fileInput && uploadButton) {
+        fileInput.addEventListener('change', toggleUploadButton);
+        toggleUploadButton();
+    }
+
+    if (uploadButton) {
+        uploadButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            const form = uploadButton.closest('form');
+            const formData = new FormData(form);
+            formData.append('upload_excel', 'true');
+            accionConProgreso(form.action || window.location.href, formData, 'Validando localizaciones...');
+        });
+    }
+
+    const btnConfirmar = document.querySelector('button[name="confirmar"]');
+    if (btnConfirmar) {
+        btnConfirmar.addEventListener('click', function(e) {
+            e.preventDefault();
+            const form = btnConfirmar.closest('form');
+            const formData = new FormData(form);
+            formData.append('confirmar', 'true');
+            accionConProgreso(form.action || window.location.href, formData, 'Importando localizaciones...');
+        });
+    }
+});
+</script>
+{% endblock %}

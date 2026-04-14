@@ -1,0 +1,104 @@
+/* Barra superior opcional */
+.acciones-estudios {
+  background: #fff;
+  padding: 18px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+/* Botones tipo enlace */
+.accion-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  padding: 0 16px;
+  gap: 8px;
+  background-color: #1a3d7c;
+  color: #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+.accion-btn:hover { background-color: #163366; }
+.accion-primaria { background-color: #1a3d7c; color: #fff; }
+.accion-secundaria { background-color: #e8f0fe; color: #1a3d7c; }
+.accion-secundaria:hover { background-color: #d6e3ff; }
+
+/* Tabla */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  max-height: 80vh;
+  overflow-y: scroll;
+}
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;          /* Igual que Muestras */
+  table-layout: auto;
+  white-space: nowrap;
+  background: #fff;
+}
+
+.styled-table th,
+.styled-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #dfe3e6;
+  text-align: left;
+  vertical-align: top;
+}
+
+.styled-table tbody tr:hover {
+  background-color: #e8f0fe !important;
+}
+
+/* Columnas con texto largo */
+.wrap-text {
+  white-space: normal !important;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 480px;
+}
+
+/* Chips dentro de la tabla */
+.chip-detalle {
+  padding: 6px 10px;
+  font-size: 12px;
+  background: #e8f0fe;
+  color: #1a3d7c;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  border: 1px solid #dfe3e6;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.chip-detalle:hover { background: #d7e4ff; }
+
+/* Indicadores de orden */
+.styled-table th {
+  position: relative;
+  padding-right: 22px;
+}
+.sorting::after        { content: "↕"; right: 6px; opacity: 0.4; font-size: 12px; position: absolute; }
+.sorting_asc::after    { content: "↑"; opacity: 1; }
+.sorting_desc::after   { content: "↓"; opacity: 1; }
+
+/* Ajustes responsive */
+@media (max-width: 1024px) {
+  .wrap-text { max-width: 360px; }
+}
+@media (max-width: 768px) {
+  .wrap-text { max-width: 280px; }
+  .acciones-estudios { gap: 8px; padding: 14px; }
+}

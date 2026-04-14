@@ -1,0 +1,328 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}
+Detalles del recurso
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+
+<style>
+  .resource-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .resource-hero {
+    background: linear-gradient(180deg, #ffffff 0%, #f6f8fb 100%);
+    color: #173a63;
+    border: 1px solid #e0e7ef;
+    border-radius: 18px;
+    padding: 28px;
+    box-shadow: 0 16px 32px rgba(22, 48, 77, 0.08);
+  }
+
+  .resource-hero h1 {
+    margin: 0 0 8px;
+    color: #173a63;
+  }
+
+  .resource-hero p {
+    margin: 0;
+    color: #5a6d80;
+  }
+
+  .resource-badges {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+
+  .resource-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #edf4fb;
+    border: 1px solid #d8e7f5;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1d507f;
+  }
+
+  .resource-layout {
+    display: grid;
+    grid-template-columns: 1.3fr 0.9fr;
+    gap: 18px;
+  }
+
+  .resource-section-title {
+    margin: 0 0 14px;
+    color: #1a3d7c;
+    font-size: 17px;
+  }
+
+  .resource-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+  }
+
+  .resource-fact {
+    background: linear-gradient(180deg, #f7fbff 0%, #eef5fb 100%);
+    border: 1px solid #dce8f5;
+    border-radius: 14px;
+    padding: 14px;
+  }
+
+  .resource-fact-label {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #5c7189;
+    margin-bottom: 6px;
+  }
+
+  .resource-fact-value {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    color: #173a63;
+    word-break: break-word;
+  }
+
+  .resource-photo-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .resource-photo-frame {
+    border-radius: 16px;
+    overflow: hidden;
+    background: linear-gradient(180deg, #edf6ff 0%, #dbefff 100%);
+    border: 1px solid #d7e8f7;
+    min-height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .resource-photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .resource-photo-empty {
+    color: #5f7893;
+    font-size: 14px;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .repair-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .repair-item {
+    border: 1px solid #dde7f1;
+    border-radius: 14px;
+    padding: 16px;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(31, 66, 108, 0.06);
+  }
+
+  .repair-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .repair-date {
+    font-weight: 700;
+    color: #1c4a78;
+  }
+
+  .repair-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  .repair-icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid #c9daf0;
+    background: #e8f1ff;
+    color: #1d4f86;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 16px;
+    line-height: 1;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+
+  .repair-icon-btn:hover {
+    background: #d9e8ff;
+    border-color: #9fc0ea;
+    color: #173a63;
+  }
+
+  .repair-icon-btn-danger {
+    color: #a61b1b;
+    background: #ffe1e1;
+    border-color: #ea9a9a;
+    cursor: pointer;
+  }
+
+  .repair-icon-btn-danger:hover {
+    background: #ffcaca;
+    border-color: #d96d6d;
+    color: #7d1111;
+  }
+
+  .repair-cost {
+    display: inline-block;
+    margin-top: 12px;
+    color: #1d5b90;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .repair-description {
+    margin: 0;
+    color: #42576d;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 860px) {
+    .resource-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="form-container resource-shell">
+    <div class="acciones-estudios">
+        <a href="/archivo" class="accion-btn accion-secundaria">Volver al archivo</a>
+        {% if perms.muestras.can_change_localizaciones_web %}
+        <a href="{{ congelador.congelador }}/editar" class="accion-btn accion-primaria">✏️ Editar detalles del recurso</a>
+        {% endif %}
+        {% if perms.muestras.can_add_localizaciones_web %}
+        <a href="{% url 'opciones_creacion_localizaciones' congelador.congelador %}" class="accion-btn accion-primaria">➕ Crear posiciones</a>
+        {% endif %}
+        {% if perms.muestras.can_change_localizaciones_web %}
+        <a href="{% url 'anadir_reparacion_recurso' congelador.congelador %}" class="accion-btn accion-primaria">🔧 Añadir reparación</a>
+        {% endif %}
+    </div>
+
+    <section class="resource-hero">
+        <h1>Recurso {{ congelador.congelador }}</h1>
+        <p>Resumen visual de la información técnica, ubicación y mantenimiento del recurso.</p>
+        <div class="resource-badges">
+            <span class="resource-badge">{{ congelador.tipo_estructura_display_safe }}</span>
+        </div>
+    </section>
+
+    <div class="resource-layout">
+        <section class="form-card">
+            <h2 class="resource-section-title">Información del recurso</h2>
+            <div class="resource-facts">
+                <div class="resource-fact">
+                    <span class="resource-fact-label">Nombre del recurso</span>
+                    <span class="resource-fact-value">{{ congelador.congelador }}</span>
+                </div>
+                <div class="resource-fact">
+                    <span class="resource-fact-label">Estructura</span>
+                    <span class="resource-fact-value">{{ congelador.tipo_estructura_display_safe }}</span>
+                </div>
+                <div class="resource-fact">
+                    <span class="resource-fact-label">Modelo</span>
+                    <span class="resource-fact-value">{{ congelador.modelo|default:"-" }}</span>
+                </div>
+                <div class="resource-fact">
+                    <span class="resource-fact-label">Año de compra</span>
+                    <span class="resource-fact-value">{{ congelador.ano_compra|default:"-" }}</span>
+                </div>
+                <div class="resource-fact">
+                    <span class="resource-fact-label">Temperatura en ºC</span>
+                    <span class="resource-fact-value">{{ congelador.temperatura_objetivo|default:"-" }}</span>
+                </div>
+                <div class="resource-fact">
+                    <span class="resource-fact-label">Localización</span>
+                    <span class="resource-fact-value">{{ congelador.localizacion_edificio|default:"-" }}</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="form-card resource-photo-card">
+            <h2 class="resource-section-title">Fotografía</h2>
+            <div class="resource-photo-frame">
+                {% if congelador.fotografia %}
+                    <img src="{{ congelador.fotografia.url }}" alt="Fotografía del recurso {{ congelador.congelador }}">
+                {% else %}
+                    <div class="resource-photo-empty">
+                        No hay fotografia registrada para este recurso.
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+
+    <section class="form-card">
+        <h2 class="resource-section-title">Historial de reparaciones</h2>
+        {% if congelador.reparaciones.all %}
+            <div class="repair-list">
+                {% for reparacion in congelador.reparaciones.all %}
+                    <article class="repair-item">
+                        <div class="repair-head">
+                            <span class="repair-date">{{ reparacion.fecha_reparacion }}</span>
+                            {% if perms.muestras.can_change_localizaciones_web %}
+                            <div class="repair-actions">
+                                <a href="{% url 'editar_reparacion_recurso' reparacion.id %}" class="repair-icon-btn chip-detalle" title="Editar reparación" aria-label="Editar reparación">✏️</a>
+                                <form method="post" action="{% url 'eliminar_reparacion_recurso' reparacion.id %}" style="margin:0;" onsubmit="return confirmarEliminacionReparacion(event, this);">
+                                    {% csrf_token %}
+                                    <button type="submit" class="repair-icon-btn repair-icon-btn-danger" title="Eliminar reparación" aria-label="Eliminar reparación">🗑️</button>
+                                </form>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <p class="repair-description">{{ reparacion.descripcion }}</p>
+                        <span class="repair-cost">Coste: {{ reparacion.coste|default:"-" }}</span>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No hay reparaciones registradas para este recurso.</p>
+        {% endif %}
+    </section>
+</div>
+<script>
+  async function confirmarEliminacionReparacion(event, form) {
+    event.preventDefault();
+    const aceptado = await window.confirmarAccionApp({
+      title: 'Eliminar reparación',
+      message: '¿Quieres eliminar esta reparación del historial?',
+      confirmText: 'Eliminar'
+    });
+    if (aceptado) {
+      form.submit();
+    }
+    return false;
+  }
+</script>
+{% endblock %}

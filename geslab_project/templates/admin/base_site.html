@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}Administración - {{ block.super }}{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+<link rel="alternate icon" href="{% static 'img/favicon.svg' %}" type="image/x-icon">
+<style>
+  #site-name a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #site-name img {
+    height: 28px;
+    width: auto;
+  }
+</style>
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+  <a href="{% url 'admin:index' %}">
+    <img src="{% static 'img/logo.png' %}" alt="GesLab">
+    GesLab Administración
+  </a>
+</h1>
+{% endblock %}

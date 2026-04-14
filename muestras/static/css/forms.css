@@ -1,0 +1,287 @@
+/* ===== CONTENEDOR GENERAL ===== */
+.form-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* ===== CABECERA ===== */
+.form-header {
+    margin-bottom: 20px;
+}
+
+.form-header h1 {
+    color: #1a3d7c;
+    margin-bottom: 5px;
+}
+
+.form-subtitle {
+    color: #555;
+    font-size: 14px;
+}
+
+/* ===== FORMULARIO ===== */
+.styled-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ===== TARJETAS ===== */
+.form-card {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.form-card h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 16px;
+    color: #1a3d7c;
+}
+
+/* ===== GRID DE CAMPOS ===== */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-field label {
+    font-size: 13px;
+    margin-bottom: 4px;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-field input {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #dfe3e6;
+    font-size: 14px;
+}
+
+.form-field input:focus {
+    outline: none;
+    border-color: #1a3d7c;
+    box-shadow: 0 0 0 2px rgba(26,61,124,0.15);
+}
+
+/* ===== BOTONES ===== */
+.form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+/* Campo obligatorio */
+.required {
+    color: #d32f2f;
+    margin-left: 3px;
+}
+
+/* Texto de ayuda */
+.help-text {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+}
+
+/* Errores */
+.error-text {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #d32f2f;
+    font-weight: 600;
+}
+
+/* Inputs Django */
+.styled-form input,
+.styled-form select,
+.styled-form textarea {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #dfe3e6;
+    font-size: 14px;
+}
+
+.styled-form textarea {
+    resize: vertical;
+}
+
+.styled-form input:focus,
+.styled-form select:focus,
+.styled-form textarea:focus {
+    outline: none;
+    border-color: #1a3d7c;
+    box-shadow: 0 0 0 2px rgba(26,61,124,0.15);
+}
+
+/* ===== TARJETA INFORMATIVA ===== */
+.info-card {
+    background: #f8fbff;
+    border-left: 4px solid #1a3d7c;
+}
+
+.info-card h2 {
+    margin-top: 0;
+}
+
+/* Enlace a la plantilla */
+.link-plantilla {
+    font-weight: 600;
+    color: #1a3d7c;
+    text-decoration: underline;
+}
+
+.link-plantilla:hover {
+    color: #163366;
+}
+
+/* Lista de requisitos */
+.requirements-list {
+    margin: 10px 0;
+    padding-left: 18px;
+}
+
+.requirements-list li {
+    margin-bottom: 6px;
+}
+
+/* Texto aclaratorio */
+.hint {
+    font-size: 12px;
+    color: #555;
+}
+
+.note {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #333;
+}
+
+/* ===== MENSAJES ===== */
+.messages-card {
+    background: #f0f5ff;
+    border-left: 4px solid #1a3d7c;
+}
+
+.message-item {
+    margin: 6px 0;
+    font-weight: 500;
+}
+
+.message-item.error {
+    color: #d32f2f;
+    background: #ffebee;
+    border-left: 4px solid #d32f2f;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.message-item.warning {
+    color: #856404;
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+/* Reglas con mayor especificidad para garantizar la visualización correcta
+   de advertencias y errores dentro de las tarjetas de mensajes. Se usan
+   !important para evitar conflictos con otros estilos globales. */
+.form-card.messages-card .message-item.warning {
+    color: #856404 !important;
+    background: #fff3cd !important;
+    border-left: 4px solid #ffc107 !important;
+}
+
+.form-card.messages-card .message-item.error {
+    color: #d32f2f !important;
+    background: #ffebee !important;
+    border-left: 4px solid #d32f2f !important;
+}
+
+/* ===== NOTAS DE ADVERTENCIA ===== */
+.note.warning {
+    background: #fff3cd;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+/* ===== CONFIRMACIÓN ===== */
+.confirm-card {
+    border-left: 4px solid #4caf50;
+}
+ /* ===== LISTA DE CHECKBOX / RADIO ===== */
+.checkbox-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+
+    border: 1px solid #dfe3e6;
+    background: #ffffff;
+}
+
+.checkbox-item:hover {
+    background: #f3f7ff;
+}
+
+.checkbox-item input {
+    transform: scale(1.2);
+}
+
+/* ===== TARJETA DE ADVERTENCIA ===== */
+.warning-card {
+    background: #fff3cd;
+    border-left: 4px solid #ffa000;
+}
+
+.detalle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.estado-chip {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.estado-disponible {
+    background: #d4edda;
+    color: #155724;
+}
+
+.estado-destruida {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.estado-enviada {
+    background: #dbe9ff;
+    color: #1a3d7c;
+}
+
+.estado-parcial {
+    background: #fff3cd;
+    color: #856404;
+}

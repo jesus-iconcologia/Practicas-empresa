@@ -1,0 +1,134 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block title %}
+Crear material
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+<style>
+  .inline-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .material-section {
+    padding: 16px;
+    border: 1px solid #d9e4ef;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #fcfdff 0%, #f5f9fd 100%);
+    margin-bottom: 16px;
+  }
+
+  .material-section[hidden] {
+    display: none;
+  }
+
+  .material-section-title {
+    margin: 0 0 12px;
+    color: #173a63;
+    font-size: 15px;
+  }
+</style>
+
+<div class="form-container">
+  <div class="acciones-estudios">
+    <a href="{% url 'materiales_todos' %}" class="accion-btn accion-secundaria">Volver a materiales</a>
+  </div>
+
+  <div class="form-header">
+    <h1>➕ Crear material</h1>
+    <p class="form-subtitle">Configure qué campos se mostrarán cuando este material se seleccione en una alícuota.</p>
+  </div>
+
+  <form method="post" class="styled-form">
+    {% csrf_token %}
+    <div class="form-card">
+      <h2>Datos del material</h2>
+      <div class="material-section">
+        <h3 class="material-section-title">Nombre del material</h3>
+        <div class="form-field" style="margin-bottom: 0;">
+          <label for="{{ form.nombre.id_for_label }}">Nombre del material <span class="required">*</span></label>
+          {{ form.nombre }}
+          {% if form.nombre.errors %}<div class="error-text">{{ form.nombre.errors|striptags }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="material-section">
+        <div class="form-field" style="margin-bottom: 0;">
+          <label class="inline-check" for="{{ form.usa_volumen.id_for_label }}">{{ form.usa_volumen }} Usa volumen</label>
+          {% if form.usa_volumen.errors %}<div class="error-text">{{ form.usa_volumen.errors|striptags }}</div>{% endif %}
+        </div>
+      </div>
+      <div class="material-section" id="volume-section" hidden>
+        <h3 class="material-section-title">Unidades de volumen</h3>
+        <div class="form-field" style="margin-bottom: 0;">
+          <label for="{{ form.unidades_volumen.id_for_label }}">Unidades de volumen</label>
+          {{ form.unidades_volumen }}
+          {% if form.unidades_volumen.help_text %}<small class="help-text">{{ form.unidades_volumen.help_text }}</small>{% endif %}
+          {% if form.unidades_volumen.errors %}<div class="error-text">{{ form.unidades_volumen.errors|striptags }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="material-section">
+        <div class="form-field" style="margin-bottom: 0;">
+          <label class="inline-check" for="{{ form.usa_concentracion.id_for_label }}">{{ form.usa_concentracion }} Usa concentración</label>
+          {% if form.usa_concentracion.errors %}<div class="error-text">{{ form.usa_concentracion.errors|striptags }}</div>{% endif %}
+        </div>
+      </div>
+      <div class="material-section" id="concentration-section" hidden>
+        <h3 class="material-section-title">Unidades de concentración</h3>
+        <div class="form-field" style="margin-bottom: 0;">
+          <label for="{{ form.unidades_concentracion.id_for_label }}">Unidades de concentración</label>
+          {{ form.unidades_concentracion }}
+          {% if form.unidades_concentracion.help_text %}<small class="help-text">{{ form.unidades_concentracion.help_text }}</small>{% endif %}
+          {% if form.unidades_concentracion.errors %}<div class="error-text">{{ form.unidades_concentracion.errors|striptags }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="material-section">
+        <div class="form-field" style="margin-bottom: 0;">
+          <label class="inline-check" for="{{ form.usa_unidades_bloque.id_for_label }}">{{ form.usa_unidades_bloque }} Usa unidades</label>
+          {% if form.usa_unidades_bloque.errors %}<div class="error-text">{{ form.usa_unidades_bloque.errors|striptags }}</div>{% endif %}
+        </div>
+      </div>
+      <div class="material-section" id="units-section" hidden>
+        <h3 class="material-section-title">Unidades</h3>
+        <div class="form-field" style="margin-bottom: 0;">
+          <label for="{{ form.unidades_recuento.id_for_label }}">Unidades</label>
+          {{ form.unidades_recuento }}
+          {% if form.unidades_recuento.help_text %}<small class="help-text">{{ form.unidades_recuento.help_text }}</small>{% endif %}
+          {% if form.unidades_recuento.errors %}<div class="error-text">{{ form.unidades_recuento.errors|striptags }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="accion-btn accion-primaria">💾 Guardar material</button>
+      <a href="{% url 'materiales_todos' %}" class="accion-btn accion-secundaria">Cancelar</a>
+    </div>
+  </form>
+</div>
+
+<script>
+  const usaVolumen = document.getElementById('{{ form.usa_volumen.id_for_label }}');
+  const usaConcentracion = document.getElementById('{{ form.usa_concentracion.id_for_label }}');
+  const usaUnidades = document.getElementById('{{ form.usa_unidades_bloque.id_for_label }}');
+  const volumeSection = document.getElementById('volume-section');
+  const concentrationSection = document.getElementById('concentration-section');
+  const unitsSection = document.getElementById('units-section');
+
+  function syncMaterialSections() {
+    volumeSection.hidden = !usaVolumen.checked;
+    concentrationSection.hidden = !usaConcentracion.checked;
+    unitsSection.hidden = !usaUnidades.checked;
+  }
+
+  usaVolumen.addEventListener('change', syncMaterialSections);
+  usaConcentracion.addEventListener('change', syncMaterialSections);
+  usaUnidades.addEventListener('change', syncMaterialSections);
+  syncMaterialSections();
+</script>
+{% endblock %}

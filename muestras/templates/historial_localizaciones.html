@@ -1,0 +1,73 @@
+{% extends "master.html" %}
+{% load static %}
+{% load muestras_filters %}
+
+{% block title %}
+Historial de localizaciones
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/muestras_todas.css' %}">
+<div class="form-container">
+    <div class="acciones-estudios">
+        <a href="/muestras" class="accion-btn accion-secundaria">Volver a muestras</a>
+    </div>
+
+    <div class="form-header">
+        <h1>Historial de localizaciones</h1>
+        <p class="form-subtitle">Muestra: <strong>{{ muestra.nom_lab }}</strong></p>
+    </div>
+
+    <div class="form-card">
+        <h2>Resumen de la muestra</h2>
+        <div class="detalle-grid">
+            <p><strong>Llegada al laboratorio:</strong> {{ muestra.fecha_llegada|default:"&mdash;" }}</p>
+            <p><strong>Centro de procedencia:</strong> {{ muestra.centro_procedencia|default:"&mdash;" }}</p>
+            <p>
+                <strong>Estado actual:</strong>
+                <span class="estado-chip estado-{{ muestra.estado_actual|estado_badge_class }}">
+                    {{ muestra.estado_actual|estado_label|default:"&mdash;" }}
+                </span>
+            </p>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <h2>Historial de localizaciones</h2>
+        <div class="table-container">
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Localizacion</th>
+                        <th>Fecha de asignacion</th>
+                        <th>Usuario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for historial in historiales %}
+                    <tr>
+                        <td>
+                            {% if historial.localizacion %}
+                                {{ historial.localizacion }}
+                            {% else %}
+                                <em>Localizacion eliminada</em>
+                            {% endif %}
+                        </td>
+                        <td data-sort="{{ historial.fecha_asignacion|date:'Y-m-d'|default:'' }}">{{ historial.fecha_asignacion }}</td>
+                        <td>{{ historial.usuario_asignacion.username }}</td>
+                    </tr>
+                {% endfor %}
+
+                {% if muestra.estado_actual == 'DEST' and estado_destruccion %}
+                    <tr class="status-destroyed">
+                        <td><strong>Destruida</strong></td>
+                        <td data-sort="{{ estado_destruccion.fecha|date:'Y-m-d'|default:'' }}">{{ estado_destruccion.fecha }}</td>
+                        <td>{{ estado_destruccion.usuario.username }}</td>
+                    </tr>
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

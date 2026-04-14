@@ -1,0 +1,779 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}
+Crear posiciones por formulario
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+
+<style>
+  .builder-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .builder-card {
+    border: 1px solid #d9e3ef;
+    border-radius: 16px;
+    padding: 18px;
+    background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+    box-shadow: 0 10px 24px rgba(23, 58, 99, 0.06);
+  }
+
+  .builder-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .builder-header h2,
+  .builder-header h3,
+  .builder-header h4 {
+    margin: 0;
+    color: #173a63;
+  }
+
+  .capacity-chip {
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid #d8e4f2;
+    color: #1d3f70;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .builder-section {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .level-card {
+    border: 1px solid #dde6f0;
+    border-radius: 14px;
+    padding: 14px;
+    background: #fff;
+  }
+
+  .level-card.level-rack {
+    margin-left: 24px;
+    border-color: #e2daf8;
+    box-shadow: inset 0 0 0 1px rgba(146, 95, 255, 0.08);
+  }
+
+  .level-card.level-bandeja {
+    margin-left: 24px;
+    border-color: #dce9f7;
+  }
+
+  .level-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: start;
+  }
+
+  .level-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .level-meta {
+    color: #5f7388;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .lock-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #eef5fb;
+    color: #48617d;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .name-input {
+    width: 100%;
+    height: 42px;
+    padding: 8px 12px;
+    border: 1px solid #cfd8e3;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 14px;
+  }
+
+  .name-input[readonly],
+  .box-row select[disabled] {
+    background: #f4f7fb;
+    color: #5f7388;
+    cursor: not-allowed;
+  }
+
+  .input-error {
+    border-color: #d92d20;
+    background: #fff6f5;
+  }
+
+  .box-row {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) minmax(180px, 220px) auto;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 12px;
+    border: 1px solid #e3ebf4;
+    border-radius: 12px;
+    background: #fbfdff;
+  }
+
+  .box-row select {
+    height: 42px;
+    padding: 8px 12px;
+    border: 1px solid #cfd8e3;
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  .box-capacity {
+    color: #6a7f96;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .field-error {
+    margin-top: 6px;
+    color: #b42318;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .field-error-block {
+    margin-top: 12px;
+  }
+
+  .ghost-btn,
+  .delete-btn {
+    border: 1px solid #d2dcea;
+    border-radius: 10px;
+    background: #fff;
+    padding: 9px 14px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #233d63;
+  }
+
+  .delete-btn {
+    color: #b42318;
+    border-color: #f0c7c2;
+  }
+
+  .inline-add {
+    margin-top: 10px;
+  }
+
+  .builder-empty {
+    padding: 14px;
+    border: 1px dashed #cad7e5;
+    border-radius: 12px;
+    color: #667b91;
+    background: #fbfdff;
+  }
+
+  .builder-submit {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+
+  @media (max-width: 860px) {
+    .level-row,
+    .box-row,
+    .builder-header {
+      grid-template-columns: 1fr;
+      display: grid;
+    }
+
+    .level-card.level-rack,
+    .level-card.level-bandeja {
+      margin-left: 0;
+    }
+
+    .builder-submit {
+      flex-direction: column;
+    }
+  }
+</style>
+
+<div class="form-container builder-shell">
+  <div class="acciones-estudios">
+    <a href="{% url 'opciones_creacion_localizaciones' congelador.congelador %}" class="accion-btn accion-secundaria">Volver a opciones</a>
+  </div>
+
+  <div class="form-header">
+    <h1>Crear posiciones mediante formulario</h1>
+    <p class="form-subtitle">Configure la estructura del recurso {{ congelador.congelador }} de forma dinámica.</p>
+  </div>
+
+  <div class="builder-card">
+    <div class="builder-header">
+      <div>
+        <h2>Estructura del recurso</h2>
+        {% if simple_structure %}
+          <p class="form-subtitle">Jerarquía: estante, cajón, caja, fila y columna.</p>
+        {% else %}
+          <p class="form-subtitle">Jerarquía: estante, rack, bandeja, caja, fila y columna.</p>
+        {% endif %}
+      </div>
+      <div class="capacity-chip">Capacidad total: <span id="capacity-total">0</span> posiciones</div>
+    </div>
+
+    <form method="post" id="builder-form">
+      {% csrf_token %}
+      <input type="hidden" name="structure_json" id="structure-json">
+      <div id="builder-root" class="builder-section"></div>
+
+      <div class="inline-add">
+        <button type="button" class="ghost-btn" id="add-estante-btn">+ Agregar estante</button>
+      </div>
+
+      <div class="builder-submit form-actions">
+        <button type="submit" class="accion-btn accion-primaria">Guardar estructura</button>
+        <a href="{% url 'detalles_congelador' congelador.congelador %}" class="accion-btn accion-secundaria">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{ layout_options|json_script:"layout-options-data" }}
+{{ initial_structure_json|json_script:"initial-structure-data" }}
+
+<script>
+  const isSimpleStructure = {{ simple_structure|yesno:"true,false" }};
+  const layoutOptions = JSON.parse(document.getElementById('layout-options-data').textContent);
+  const initialStructure = JSON.parse(document.getElementById('initial-structure-data').textContent || '{"estantes": []}');
+  const root = document.getElementById('builder-root');
+  const capacityTotal = document.getElementById('capacity-total');
+  const structureInput = document.getElementById('structure-json');
+  const builderForm = document.getElementById('builder-form');
+  let pendingFocusSelector = null;
+  let hasInteracted = false;
+  let attemptedSubmit = false;
+  let validationErrors = {};
+
+  const makeId = () => Math.random().toString(36).slice(2, 10);
+  const defaultBox = () => ({ id: makeId(), name: '', layout: '9x9', existing: false });
+  const defaultBandeja = () => ({ id: makeId(), name: '', cajas: [], existing: false });
+  const defaultRack = () => (
+    isSimpleStructure
+      ? { id: makeId(), name: '', cajas: [], existing: false }
+      : { id: makeId(), name: '', bandejas: [], existing: false }
+  );
+  const defaultEstante = () => ({ id: makeId(), name: '', racks: [], existing: false });
+
+  const state = {
+    estantes: (initialStructure.estantes || []).map(normalizeEstante),
+  };
+
+  function normalizeEstante(estante) {
+    return {
+      id: estante.id || makeId(),
+      name: estante.name || '',
+      existing: Boolean(estante.existing),
+      racks: (estante.racks || []).map(normalizeRack),
+    };
+  }
+
+  function normalizeRack(rack) {
+    if (isSimpleStructure) {
+      return {
+        id: rack.id || makeId(),
+        name: rack.name || '',
+        existing: Boolean(rack.existing),
+        cajas: (rack.cajas || []).map(normalizeBox),
+      };
+    }
+    return {
+      id: rack.id || makeId(),
+      name: rack.name || '',
+      existing: Boolean(rack.existing),
+      bandejas: (rack.bandejas || []).map(normalizeBandeja),
+    };
+  }
+
+  function normalizeBandeja(bandeja) {
+    return {
+      id: bandeja.id || makeId(),
+      name: bandeja.name || '',
+      existing: Boolean(bandeja.existing),
+      cajas: (bandeja.cajas || []).map(normalizeBox),
+    };
+  }
+
+  function normalizeBox(box) {
+    return {
+      id: box.id || makeId(),
+      name: box.name || '',
+      layout: box.layout || '9x9',
+      existing: Boolean(box.existing),
+    };
+  }
+
+  function layoutCapacity(layoutValue) {
+    const match = layoutOptions.find(option => option.value === layoutValue);
+    if (!match) return 0;
+    const capacityMatch = match.label.match(/\((\d+) posiciones\)/);
+    return capacityMatch ? Number(capacityMatch[1]) : 0;
+  }
+
+  function persistStructure() {
+    structureInput.value = JSON.stringify({
+      estantes: state.estantes.map(estante => ({
+        name: estante.name.trim(),
+        existing: Boolean(estante.existing),
+        racks: estante.racks.map(rack => (
+          isSimpleStructure
+            ? {
+                name: rack.name.trim(),
+                existing: Boolean(rack.existing),
+                cajas: rack.cajas.map(caja => ({
+                  name: caja.name.trim(),
+                  layout: caja.layout,
+                  existing: Boolean(caja.existing),
+                })),
+              }
+            : {
+                name: rack.name.trim(),
+                existing: Boolean(rack.existing),
+                bandejas: rack.bandejas.map(bandeja => ({
+                  name: bandeja.name.trim(),
+                  existing: Boolean(bandeja.existing),
+                  cajas: bandeja.cajas.map(caja => ({
+                    name: caja.name.trim(),
+                    layout: caja.layout,
+                    existing: Boolean(caja.existing),
+                  })),
+                })),
+              }
+        )),
+      })),
+    });
+  }
+
+  function updateCapacity() {
+    let total = 0;
+    state.estantes.forEach(estante => {
+      estante.racks.forEach(rack => {
+        if (isSimpleStructure) {
+          rack.cajas.forEach(caja => { total += layoutCapacity(caja.layout); });
+          return;
+        }
+        rack.bandejas.forEach(bandeja => {
+          bandeja.cajas.forEach(caja => { total += layoutCapacity(caja.layout); });
+        });
+      });
+    });
+    capacityTotal.textContent = total;
+  }
+
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function errorKey(type, id) {
+    return `${type}:${id}`;
+  }
+
+  function setError(errors, key, message) {
+    if (!errors[key]) {
+      errors[key] = message;
+    }
+  }
+
+  function normalizedName(value) {
+    return (value || '').trim().toLocaleLowerCase();
+  }
+
+  function validateStructure() {
+    const errors = {};
+
+    if (attemptedSubmit && state.estantes.length === 0) {
+      errors._global = 'Debe añadir al menos un estante.';
+      return errors;
+    }
+
+    const estanteNames = new Set();
+    state.estantes.forEach(estante => {
+      const estanteName = (estante.name || '').trim();
+      const estanteKey = errorKey('estante', estante.id);
+
+      if (!estanteName && attemptedSubmit) {
+        setError(errors, estanteKey, 'Debe indicar un nombre para el estante.');
+      } else if (estanteName) {
+        const lookup = normalizedName(estanteName);
+        if (estanteNames.has(lookup)) {
+          setError(errors, estanteKey, 'No puede haber dos estantes con el mismo nombre.');
+        } else {
+          estanteNames.add(lookup);
+        }
+      }
+
+      const rackNames = new Set();
+      estante.racks.forEach(rack => {
+        const rackName = (rack.name || '').trim();
+        const rackKey = errorKey('rack', rack.id);
+
+        if (!rackName && attemptedSubmit) {
+          setError(errors, rackKey, `Debe indicar un nombre para el ${isSimpleStructure ? 'cajon' : 'rack'}.`);
+        } else if (rackName) {
+          const lookup = normalizedName(rackName);
+          if (rackNames.has(lookup)) {
+            setError(errors, rackKey, `No puede haber dos ${isSimpleStructure ? 'cajones' : 'racks'} con el mismo nombre en el mismo estante.`);
+          } else {
+            rackNames.add(lookup);
+          }
+        }
+
+        if (isSimpleStructure) {
+          const boxNames = new Set();
+          rack.cajas.forEach(box => {
+            const boxName = (box.name || '').trim();
+            const boxKey = errorKey('box', box.id);
+
+            if (!boxName && attemptedSubmit) {
+              setError(errors, boxKey, 'Debe indicar un nombre para la caja.');
+            } else if (boxName) {
+              const lookup = normalizedName(boxName);
+              if (boxNames.has(lookup)) {
+                setError(errors, boxKey, 'No puede haber dos cajas con el mismo nombre en el mismo cajon.');
+              } else {
+                boxNames.add(lookup);
+              }
+            }
+          });
+          return;
+        }
+
+        const bandejaNames = new Set();
+        rack.bandejas.forEach(bandeja => {
+          const bandejaName = (bandeja.name || '').trim();
+          const bandejaKey = errorKey('bandeja', bandeja.id);
+
+          if (!bandejaName && attemptedSubmit) {
+            setError(errors, bandejaKey, 'Debe indicar un nombre para la bandeja.');
+          } else if (bandejaName) {
+            const lookup = normalizedName(bandejaName);
+            if (bandejaNames.has(lookup)) {
+              setError(errors, bandejaKey, 'No puede haber dos bandejas con el mismo nombre en el mismo rack.');
+            } else {
+              bandejaNames.add(lookup);
+            }
+          }
+
+          const boxNames = new Set();
+          bandeja.cajas.forEach(box => {
+            const boxName = (box.name || '').trim();
+            const boxKey = errorKey('box', box.id);
+
+            if (!boxName && attemptedSubmit) {
+              setError(errors, boxKey, 'Debe indicar un nombre para la caja.');
+            } else if (boxName) {
+              const lookup = normalizedName(boxName);
+              if (boxNames.has(lookup)) {
+                setError(errors, boxKey, 'No puede haber dos cajas con el mismo nombre en la misma bandeja.');
+              } else {
+                boxNames.add(lookup);
+              }
+            }
+          });
+        });
+      });
+    });
+
+    return errors;
+  }
+
+  function updateValidationFeedback() {
+    validationErrors = hasInteracted ? validateStructure() : {};
+
+    root.querySelectorAll('[data-error-key]').forEach(node => {
+      const message = validationErrors[node.dataset.errorKey] || '';
+      node.textContent = message;
+      node.hidden = !message;
+    });
+
+    root.querySelectorAll('[data-input-error-key]').forEach(node => {
+      node.classList.toggle('input-error', Boolean(validationErrors[node.dataset.inputErrorKey]));
+    });
+  }
+
+  function render() {
+    persistStructure();
+    updateCapacity();
+
+    if (state.estantes.length === 0) {
+      root.innerHTML = `
+        <div class="builder-empty">Todavia no hay estantes. Empiece agregando uno.</div>
+        <div class="field-error field-error-block" data-error-key="_global" hidden></div>
+      `;
+      updateValidationFeedback();
+      return;
+    }
+
+    root.innerHTML = state.estantes.map((estante, estanteIndex) => `
+      <section class="level-card level-estante" data-estante-index="${estanteIndex}">
+        <div class="builder-header">
+          <h3>Estante ${estanteIndex + 1}</h3>
+        </div>
+        <div class="level-row">
+          <input class="name-input" type="text" value="${escapeHtml(estante.name)}" placeholder="Nombre del estante" data-action="estante-name" data-input-error-key="${errorKey('estante', estante.id)}" data-focus-id="estante-${estante.id}" ${estante.existing ? 'readonly' : ''}>
+          <div class="level-actions">
+            <span class="level-meta">${estante.racks.length} ${isSimpleStructure ? 'cajones' : 'racks'}</span>
+            ${estante.existing ? '<span class="lock-chip">Ya creado</span>' : '<button type="button" class="delete-btn" data-action="delete-estante">🗑</button>'}
+          </div>
+        </div>
+        <div class="field-error" data-error-key="${errorKey('estante', estante.id)}" hidden></div>
+
+        <div class="builder-section">
+          ${estante.racks.map((rack, rackIndex) => `
+            <section class="level-card level-rack" data-rack-index="${rackIndex}">
+              <div class="builder-header">
+                <h4>${isSimpleStructure ? 'Cajon' : 'Rack'} ${rackIndex + 1}</h4>
+              </div>
+              <div class="level-row">
+                <input class="name-input" type="text" value="${escapeHtml(rack.name)}" placeholder="Nombre del ${isSimpleStructure ? 'cajon' : 'rack'}" data-action="rack-name" data-input-error-key="${errorKey('rack', rack.id)}" data-focus-id="rack-${rack.id}" ${rack.existing ? 'readonly' : ''}>
+                <div class="level-actions">
+                  <span class="level-meta">${isSimpleStructure ? rack.cajas.length + ' cajas' : rack.bandejas.length + ' bandejas'}</span>
+                  ${rack.existing ? '<span class="lock-chip">Ya creado</span>' : '<button type="button" class="delete-btn" data-action="delete-rack">🗑</button>'}
+                </div>
+              </div>
+              <div class="field-error" data-error-key="${errorKey('rack', rack.id)}" hidden></div>
+
+              ${isSimpleStructure ? `
+                <div class="builder-section">
+                  ${(rack.cajas || []).map((caja, cajaIndex) => `
+                    <div data-caja-index="${cajaIndex}">
+                      <div class="box-row">
+                        <input class="name-input" type="text" value="${escapeHtml(caja.name)}" placeholder="Nombre de la caja" data-action="box-name" data-input-error-key="${errorKey('box', caja.id)}" data-focus-id="box-${caja.id}" ${caja.existing ? 'readonly' : ''}>
+                        <select data-action="box-layout" ${caja.existing ? 'disabled' : ''}>
+                          ${layoutOptions.map(option => `<option value="${option.value}" ${option.value === caja.layout ? 'selected' : ''}>${option.label}</option>`).join('')}
+                        </select>
+                        <div class="level-actions">
+                          <span class="box-capacity">${layoutCapacity(caja.layout)} pos.</span>
+                          ${caja.existing ? '<span class="lock-chip">Ya creada</span>' : '<button type="button" class="delete-btn" data-action="delete-box">🗑</button>'}
+                        </div>
+                      </div>
+                      <div class="field-error" data-error-key="${errorKey('box', caja.id)}" hidden></div>
+                    </div>
+                  `).join('')}
+                </div>
+                <div class="inline-add">
+                  <button type="button" class="ghost-btn" data-action="add-box">+ Agregar caja</button>
+                </div>
+              ` : `
+                <div class="builder-section">
+                  ${rack.bandejas.map((bandeja, bandejaIndex) => `
+                    <section class="level-card level-bandeja" data-bandeja-index="${bandejaIndex}">
+                      <div class="level-row">
+                        <input class="name-input" type="text" value="${escapeHtml(bandeja.name)}" placeholder="Nombre de la bandeja" data-action="bandeja-name" data-input-error-key="${errorKey('bandeja', bandeja.id)}" data-focus-id="bandeja-${bandeja.id}" ${bandeja.existing ? 'readonly' : ''}>
+                        <div class="level-actions">
+                          <span class="level-meta">${bandeja.cajas.length} cajas</span>
+                          ${bandeja.existing ? '<span class="lock-chip">Ya creada</span>' : '<button type="button" class="delete-btn" data-action="delete-bandeja">🗑</button>'}
+                        </div>
+                      </div>
+                      <div class="field-error" data-error-key="${errorKey('bandeja', bandeja.id)}" hidden></div>
+                      <div class="builder-section">
+                        ${bandeja.cajas.map((caja, cajaIndex) => `
+                          <div data-caja-index="${cajaIndex}">
+                            <div class="box-row">
+                              <input class="name-input" type="text" value="${escapeHtml(caja.name)}" placeholder="Nombre de la caja" data-action="box-name" data-input-error-key="${errorKey('box', caja.id)}" data-focus-id="box-${caja.id}" ${caja.existing ? 'readonly' : ''}>
+                              <select data-action="box-layout" ${caja.existing ? 'disabled' : ''}>
+                                ${layoutOptions.map(option => `<option value="${option.value}" ${option.value === caja.layout ? 'selected' : ''}>${option.label}</option>`).join('')}
+                              </select>
+                              <div class="level-actions">
+                                <span class="box-capacity">${layoutCapacity(caja.layout)} pos.</span>
+                                ${caja.existing ? '<span class="lock-chip">Ya creada</span>' : '<button type="button" class="delete-btn" data-action="delete-box">🗑</button>'}
+                              </div>
+                            </div>
+                            <div class="field-error" data-error-key="${errorKey('box', caja.id)}" hidden></div>
+                          </div>
+                        `).join('')}
+                      </div>
+                      <div class="inline-add">
+                        <button type="button" class="ghost-btn" data-action="add-box">+ Agregar caja</button>
+                      </div>
+                    </section>
+                  `).join('')}
+                </div>
+                <div class="inline-add">
+                  <button type="button" class="ghost-btn" data-action="add-bandeja">+ Agregar bandeja</button>
+                </div>
+              `}
+            </section>
+          `).join('')}
+        </div>
+
+        <div class="inline-add">
+          <button type="button" class="ghost-btn" data-action="add-rack">+ Agregar ${isSimpleStructure ? 'cajon' : 'rack'} al estante</button>
+        </div>
+      </section>
+    `).join('');
+
+    updateValidationFeedback();
+
+    if (pendingFocusSelector) {
+      const target = root.querySelector(`[data-focus-id="${pendingFocusSelector}"]`);
+      if (target) {
+        requestAnimationFrame(() => {
+          target.focus();
+          target.select();
+        });
+      }
+      pendingFocusSelector = null;
+    }
+  }
+
+  root.addEventListener('input', event => {
+    hasInteracted = true;
+    const estanteNode = event.target.closest('[data-estante-index]');
+    if (!estanteNode) return;
+    const estanteIndex = Number(estanteNode.dataset.estanteIndex);
+    const rackNode = event.target.closest('[data-rack-index]');
+    const bandejaNode = event.target.closest('[data-bandeja-index]');
+    const cajaNode = event.target.closest('[data-caja-index]');
+
+    if (event.target.dataset.action === 'estante-name') {
+      state.estantes[estanteIndex].name = event.target.value;
+    } else if (event.target.dataset.action === 'rack-name') {
+      state.estantes[estanteIndex].racks[Number(rackNode.dataset.rackIndex)].name = event.target.value;
+    } else if (event.target.dataset.action === 'bandeja-name') {
+      state.estantes[estanteIndex]
+        .racks[Number(rackNode.dataset.rackIndex)]
+        .bandejas[Number(bandejaNode.dataset.bandejaIndex)]
+        .name = event.target.value;
+    } else if (event.target.dataset.action === 'box-name') {
+      if (isSimpleStructure) {
+        state.estantes[estanteIndex]
+          .racks[Number(rackNode.dataset.rackIndex)]
+          .cajas[Number(cajaNode.dataset.cajaIndex)]
+          .name = event.target.value;
+      } else {
+        state.estantes[estanteIndex]
+          .racks[Number(rackNode.dataset.rackIndex)]
+          .bandejas[Number(bandejaNode.dataset.bandejaIndex)]
+          .cajas[Number(cajaNode.dataset.cajaIndex)]
+          .name = event.target.value;
+      }
+    }
+
+    persistStructure();
+    updateValidationFeedback();
+  });
+
+  root.addEventListener('change', event => {
+    hasInteracted = true;
+    if (event.target.dataset.action !== 'box-layout') return;
+    const estanteIndex = Number(event.target.closest('[data-estante-index]').dataset.estanteIndex);
+    const rackIndex = Number(event.target.closest('[data-rack-index]').dataset.rackIndex);
+    const cajaIndex = Number(event.target.closest('[data-caja-index]').dataset.cajaIndex);
+
+    if (isSimpleStructure) {
+      state.estantes[estanteIndex].racks[rackIndex].cajas[cajaIndex].layout = event.target.value;
+    } else {
+      const bandejaIndex = Number(event.target.closest('[data-bandeja-index]').dataset.bandejaIndex);
+      state.estantes[estanteIndex].racks[rackIndex].bandejas[bandejaIndex].cajas[cajaIndex].layout = event.target.value;
+    }
+
+    updateValidationFeedback();
+    render();
+  });
+
+  root.addEventListener('click', event => {
+    const editable = event.target.closest('input.name-input, select[data-action="box-layout"]');
+    if (editable) return;
+
+    const action = event.target.dataset.action;
+    if (!action) return;
+    const estanteNode = event.target.closest('[data-estante-index]');
+    const estanteIndex = estanteNode ? Number(estanteNode.dataset.estanteIndex) : null;
+    const rackNode = event.target.closest('[data-rack-index]');
+    const rackIndex = rackNode ? Number(rackNode.dataset.rackIndex) : null;
+    const bandejaNode = event.target.closest('[data-bandeja-index]');
+    const bandejaIndex = bandejaNode ? Number(bandejaNode.dataset.bandejaIndex) : null;
+    const cajaNode = event.target.closest('[data-caja-index]');
+    const cajaIndex = cajaNode ? Number(cajaNode.dataset.cajaIndex) : null;
+
+    if (action === 'delete-estante') {
+      state.estantes.splice(estanteIndex, 1);
+    } else if (action === 'add-rack') {
+      const rack = defaultRack();
+      state.estantes[estanteIndex].racks.push(rack);
+      pendingFocusSelector = `rack-${rack.id}`;
+    } else if (action === 'delete-rack') {
+      state.estantes[estanteIndex].racks.splice(rackIndex, 1);
+    } else if (action === 'add-bandeja') {
+      const bandeja = defaultBandeja();
+      state.estantes[estanteIndex].racks[rackIndex].bandejas.push(bandeja);
+      pendingFocusSelector = `bandeja-${bandeja.id}`;
+    } else if (action === 'delete-bandeja') {
+      state.estantes[estanteIndex].racks[rackIndex].bandejas.splice(bandejaIndex, 1);
+    } else if (action === 'add-box') {
+      if (isSimpleStructure) {
+        const box = defaultBox();
+        state.estantes[estanteIndex].racks[rackIndex].cajas.push(box);
+        pendingFocusSelector = `box-${box.id}`;
+      } else {
+        const box = defaultBox();
+        state.estantes[estanteIndex].racks[rackIndex].bandejas[bandejaIndex].cajas.push(box);
+        pendingFocusSelector = `box-${box.id}`;
+      }
+    } else if (action === 'delete-box') {
+      if (isSimpleStructure) {
+        state.estantes[estanteIndex].racks[rackIndex].cajas.splice(cajaIndex, 1);
+      } else {
+        state.estantes[estanteIndex].racks[rackIndex].bandejas[bandejaIndex].cajas.splice(cajaIndex, 1);
+      }
+    }
+    hasInteracted = true;
+    render();
+  });
+
+  document.getElementById('add-estante-btn').addEventListener('click', () => {
+    hasInteracted = true;
+    const estante = defaultEstante();
+    state.estantes.push(estante);
+    pendingFocusSelector = `estante-${estante.id}`;
+    render();
+  });
+
+  builderForm.addEventListener('submit', event => {
+    hasInteracted = true;
+    attemptedSubmit = true;
+    persistStructure();
+    updateValidationFeedback();
+
+    if (Object.keys(validationErrors).length > 0) {
+      event.preventDefault();
+      const firstErrorField = root.querySelector('.input-error');
+      if (firstErrorField) {
+        firstErrorField.focus();
+      }
+    }
+  });
+
+  render();
+</script>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}
+Importar materiales por Excel
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+
+<div class="form-container">
+
+    <div class="form-header">
+        <h1>📤 Importar materiales por Excel</h1>
+        <p class="form-subtitle">
+            Cree o actualice materiales mediante una plantilla Excel.
+        </p>
+    </div>
+
+    {% if error %}
+        <div class="form-card error-card" style="border-left: 4px solid #dc3545; background-color: #f8d7da;">
+            <p style="color: #721c24; margin: 0;">{{ error }}</p>
+        </div>
+    {% endif %}
+
+    {% if messages %}
+    <div class="form-card messages-card">
+        {% for message in messages %}
+            <p class="message-item {{ message.tags }}">{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="form-card info-card">
+        <h2>ℹ️ Instrucciones</h2>
+        <p>
+            Utilice la plantilla descargable de materiales para preparar el archivo Excel.
+        </p>
+        <p>
+            Si un material ya existe, se actualizará con la información del Excel.
+        </p>
+        <p>
+            Los valores de tipo sí/no pueden rellenarse como <strong>Si</strong> o <strong>No</strong>.
+        </p>
+    </div>
+
+    <div class="form-card">
+        <h2>⬇️ Descargar plantilla</h2>
+        <a href="{% url 'descargar_plantilla_materiales' %}"
+           download="plantilla_materiales.xlsx"
+           class="accion-btn accion-secundaria">
+            📥 Descargar plantilla de materiales
+        </a>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="styled-form">
+        {% csrf_token %}
+
+        <div class="form-card">
+            <h2>📄 Archivo Excel</h2>
+
+            {% for field in form %}
+                <div class="form-field">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                        {% if field.field.required %}
+                            <span class="required">*</span>
+                        {% endif %}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+
+                    {% if field.errors %}
+                        <div class="error-text">
+                            {{ field.errors|striptags }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <small class="error-text" style="display: block; color: #dc3545; margin-top: 5px;">Este campo es obligatorio.</small>
+        </div>
+
+        <div class="form-actions">
+            <button name="upload_excel"
+                    id="upload-button"
+                    type="submit"
+                    class="accion-btn accion-primaria"
+                    disabled>
+                ⬆️ Importar Excel
+            </button>
+
+            <a href="{% url 'materiales_todos' %}" class="accion-btn accion-secundaria">
+                ↩ Volver a materiales
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const fileInput = document.querySelector('input[name="excel_file"]');
+    const uploadButton = document.getElementById('upload-button');
+
+    function toggleUploadButton() {
+        uploadButton.disabled = !fileInput || !fileInput.files.length;
+    }
+
+    if (fileInput) {
+        fileInput.addEventListener('change', toggleUploadButton);
+        toggleUploadButton();
+    }
+});
+</script>
+{% endblock %}
