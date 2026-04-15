@@ -218,7 +218,7 @@ Lista de Estudios
               <input type="hidden" name="referencia_estudio" value="">
               <div class="multiselect-toggle">
                 <span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span>
-                <span class="arrow">▼</span>
+                <span class="arrow">{{ ICONO_DESPLEGABLE }}</span>
               </div>
               <div class="multiselect-dropdown">
                 {% for ref in opciones_referencias %}
@@ -235,7 +235,7 @@ Lista de Estudios
               <input type="hidden" name="investigador_principal" value="">
               <div class="multiselect-toggle">
                 <span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span>
-                <span class="arrow">▼</span>
+                <span class="arrow">{{ ICONO_DESPLEGABLE }}</span>
               </div>
               <div class="multiselect-dropdown">
                 {% for inv in opciones_investigadores %}
@@ -277,7 +277,7 @@ Lista de Estudios
 
         <div class="filter-buttons">
           <button type="submit" class="btn btn-primary">🔎 Filtrar</button>
-          <a href="{% url 'estudios_todos' %}" class="btn btn-secondary">✖ Eliminar filtros</a>
+          <a href="{% url 'estudios_todos' %}" class="btn btn-secondary">{{ ICONO_CERRAR }} Eliminar filtros</a>
         </div>
       </form>
     </div>
@@ -286,14 +286,14 @@ Lista de Estudios
 
 {% comment %} ACCIONES {% endcomment %}
 <div class="collapsible" style="border-radius: 8px; overflow: hidden; margin-top: 15px;">
-  <button class="collapsible-header">⚙️ Acciones</button>
+  <button class="collapsible-header">{{ ICONO_CONFIGURACION }} Acciones</button>
   <div class="collapsible-content">
     <div class="action-buttons" style="border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
 
       <div class="action-row">
         {% if perms.muestras.can_add_estudios_web %}
-        <a href="/estudios/nuevo" class="btn">➕ Nuevo estudio</a>
-        <a href="/estudios/excel" class="btn">📤📄 Importar estudios</a>
+        <a href="/estudios/nuevo" class="btn">{{ ICONO_NUEVO }} Nuevo estudio</a>
+        <a href="/estudios/excel" class="btn">{{ ICONO_UPLOAD }}{{ ICONO_DOCUMENTACION }} Importar estudios</a>
         {% endif %}
       </div>
 
@@ -309,14 +309,14 @@ Lista de Estudios
         {% if perms.muestras.can_delete_estudios_web %}
         <button type="button"
           onclick="validarSeleccionEstudios('eliminar', '¿Quieres eliminar los estudios seleccionados?')"
-          class="btn btn-danger" id='eliminar-estudios-btn' disabled>🗑️ Eliminar seleccionados</button>
+          class="btn btn-danger" id='eliminar-estudios-btn' disabled>{{ ICONO_ELIMINAR }} Eliminar seleccionados</button>
         {% endif %}
       </div>
 
       <div class="action-row">
-        <input type="button" value="☑️ Seleccionar todo" onclick="seleccionarTodoEstudios(true)"
+        <input type="button" value="{{ ICONO_CHECKBOX_MARCADO }} Seleccionar todo" onclick="seleccionarTodoEstudios(true)"
           class="btn btn-secondary">
-        <input type="button" value="☐ Deseleccionar" onclick="seleccionarTodoEstudios(false)" class="btn btn-secondary">
+        <input type="button" value="{{ ICONO_CHECKBOX_VACIO }} Deseleccionar" onclick="seleccionarTodoEstudios(false)" class="btn btn-secondary">
       </div>
 
     </div>
@@ -356,7 +356,7 @@ Lista de Estudios
       <button type="button" onclick="ejecutarBusqueda()" class="btn btn-secondary" style="padding: 8px 14px;">🔍
         Buscar</button>
       {% if busqueda %}
-      <button type="button" onclick="limpiarBusqueda()" class="btn btn-secondary" style="padding: 8px 14px;">✖ Limpiar
+      <button type="button" onclick="limpiarBusqueda()" class="btn btn-secondary" style="padding: 8px 14px;">{{ ICONO_CERRAR }} Limpiar
         búsqueda</button>
       {% endif %}
     </div>
@@ -382,10 +382,10 @@ Lista de Estudios
             <input type="checkbox" name="estudio_id" value="{{ estudio.id }}" class="form-control"
               onchange="actualizarEstadoBotonesEstudios()">
             <a href="/estudios/{{estudio.id}}" class="chip-detalle" title="Documentación"
-              style="padding: 2px 5px; margin-left: 5px;">📄</a>
+              style="padding: 2px 5px; margin-left: 5px;">{{ ICONO_DOCUMENTACION }}</a>
             {% if perms.muestras.can_change_estudios_web %}
             <a href="/estudios/{{estudio.id}}/editar" class="chip-detalle" title="Editar"
-              style="padding: 2px 5px; margin-left: 2px;">✏️</a>
+              style="padding: 2px 5px; margin-left: 2px;">{{ ICONO_EDITAR }}</a>
             {% endif %}
           </td>
           <td>{{ estudio.id }}</td>

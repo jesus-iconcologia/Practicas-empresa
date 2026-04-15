@@ -1,4 +1,4 @@
-﻿{% extends "master.html" %}
+{% extends "master.html" %}
 {% load static %}
 {% block title %}
 Archivo de muestras
@@ -429,7 +429,7 @@ Archivo de muestras
               🔎 Filtrar
             </button>
             <a href="/archivo/" class="btn btn-secondary">
-              ✖ Eliminar filtros
+              {{ ICONO_CERRAR }} Eliminar filtros
             </a>
           </div>
         </form>
@@ -667,7 +667,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- ========== PANEL DE ACCIONES ========== -->
 <div class="collapsible" style="border-radius: 8px; overflow: hidden; margin-top: 15px;">
-    <button class="collapsible-header">⚙️ Acciones</button>
+    <button class="collapsible-header">{{ ICONO_CONFIGURACION }} Acciones</button>
     <div class="collapsible-content">
       <div class="action-buttons" style="border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
 
@@ -676,7 +676,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <button type="button"
               onclick="location.href='{% url 'crear_recurso_congelador' %}'"
               class="btn">
-            ➕ Crear recurso
+            {{ ICONO_NUEVO }} Crear recurso
           </button>
           {% endif %}
         </div>
@@ -684,17 +684,17 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="action-row">
           <button type="button" class="btn btn-success"
               onclick="descargarConProgreso('{% url 'exportar_congeladores' %}', 'Exportando recursos')">
-            📊⬇ Exportar
+            {{ ICONO_EXPORTAR }}{{ ICONO_DESCARGAR }} Exportar
           </button>
 
           <button type="button" class="btn btn-success" id="exportar_seleccionadas" disabled
               onclick="exportarSeleccionadas()">
-            📊✅ Exportar seleccionadas
+            {{ ICONO_EXPORTAR }}{{ ICONO_CONFIRMACION }} Exportar seleccionadas
           </button>
 
           <button type="button" class="btn btn-success" id="exportar_libres" disabled
               onclick="exportarPosicionesLibres()">
-            📊⬇ Exportar posiciones libres
+            {{ ICONO_EXPORTAR }}{{ ICONO_DESCARGAR }} Exportar posiciones libres
           </button>
         </div>
 
@@ -702,14 +702,14 @@ document.addEventListener('DOMContentLoaded', function() {
           {% if perms.muestras.can_delete_localizaciones_web %}
           <button type="button" class="btn btn-danger" id="eliminar-btn" disabled
               onclick="eliminarPosicionesAjax()">
-            🗑 Eliminar posiciones
+            {{ ICONO_ELIMINAR }} Eliminar posiciones
           </button>
           {% endif %}
         </div>
 
         <div class="action-row">
-          <input type="button" value="☑️ Seleccionar todo" onclick="seleccionarTodo()" class="btn btn-secondary">
-          <input type="button" value="☐ Deseleccionar" onclick="deseleccionarTodo()" class="btn btn-secondary">
+          <input type="button" value="{{ ICONO_CHECKBOX_MARCADO }} Seleccionar todo" onclick="seleccionarTodo()" class="btn btn-secondary">
+          <input type="button" value="{{ ICONO_CHECKBOX_VACIO }} Deseleccionar" onclick="deseleccionarTodo()" class="btn btn-secondary">
         </div>
 
       </div>

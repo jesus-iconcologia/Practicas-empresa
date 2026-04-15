@@ -542,7 +542,7 @@ Crear posiciones por formulario
           <input class="name-input" type="text" value="${escapeHtml(estante.name)}" placeholder="Nombre del estante" data-action="estante-name" data-input-error-key="${errorKey('estante', estante.id)}" data-focus-id="estante-${estante.id}" ${estante.existing ? 'readonly' : ''}>
           <div class="level-actions">
             <span class="level-meta">${estante.racks.length} ${isSimpleStructure ? 'cajones' : 'racks'}</span>
-            ${estante.existing ? '<span class="lock-chip">Ya creado</span>' : '<button type="button" class="delete-btn" data-action="delete-estante">🗑</button>'}
+            ${estante.existing ? '<span class="lock-chip">Ya creado</span>' : '<button type="button" class="delete-btn" data-action="delete-estante">{{ ICONO_ELIMINAR }}</button>'}
           </div>
         </div>
         <div class="field-error" data-error-key="${errorKey('estante', estante.id)}" hidden></div>
@@ -557,7 +557,7 @@ Crear posiciones por formulario
                 <input class="name-input" type="text" value="${escapeHtml(rack.name)}" placeholder="Nombre del ${isSimpleStructure ? 'cajon' : 'rack'}" data-action="rack-name" data-input-error-key="${errorKey('rack', rack.id)}" data-focus-id="rack-${rack.id}" ${rack.existing ? 'readonly' : ''}>
                 <div class="level-actions">
                   <span class="level-meta">${isSimpleStructure ? rack.cajas.length + ' cajas' : rack.bandejas.length + ' bandejas'}</span>
-                  ${rack.existing ? '<span class="lock-chip">Ya creado</span>' : '<button type="button" class="delete-btn" data-action="delete-rack">🗑</button>'}
+                  ${rack.existing ? '<span class="lock-chip">Ya creado</span>' : '<button type="button" class="delete-btn" data-action="delete-rack">{{ ICONO_ELIMINAR }}</button>'}
                 </div>
               </div>
               <div class="field-error" data-error-key="${errorKey('rack', rack.id)}" hidden></div>
@@ -573,7 +573,7 @@ Crear posiciones por formulario
                         </select>
                         <div class="level-actions">
                           <span class="box-capacity">${layoutCapacity(caja.layout)} pos.</span>
-                          ${caja.existing ? '<span class="lock-chip">Ya creada</span>' : '<button type="button" class="delete-btn" data-action="delete-box">🗑</button>'}
+                          ${caja.existing ? '<span class="lock-chip">Ya creada</span>' : '<button type="button" class="delete-btn" data-action="delete-box">{{ ICONO_ELIMINAR }}</button>'}
                         </div>
                       </div>
                       <div class="field-error" data-error-key="${errorKey('box', caja.id)}" hidden></div>
@@ -591,7 +591,7 @@ Crear posiciones por formulario
                         <input class="name-input" type="text" value="${escapeHtml(bandeja.name)}" placeholder="Nombre de la bandeja" data-action="bandeja-name" data-input-error-key="${errorKey('bandeja', bandeja.id)}" data-focus-id="bandeja-${bandeja.id}" ${bandeja.existing ? 'readonly' : ''}>
                         <div class="level-actions">
                           <span class="level-meta">${bandeja.cajas.length} cajas</span>
-                          ${bandeja.existing ? '<span class="lock-chip">Ya creada</span>' : '<button type="button" class="delete-btn" data-action="delete-bandeja">🗑</button>'}
+                          ${bandeja.existing ? '<span class="lock-chip">Ya creada</span>' : '<button type="button" class="delete-btn" data-action="delete-bandeja">{{ ICONO_ELIMINAR }}</button>'}
                         </div>
                       </div>
                       <div class="field-error" data-error-key="${errorKey('bandeja', bandeja.id)}" hidden></div>
@@ -605,7 +605,7 @@ Crear posiciones por formulario
                               </select>
                               <div class="level-actions">
                                 <span class="box-capacity">${layoutCapacity(caja.layout)} pos.</span>
-                                ${caja.existing ? '<span class="lock-chip">Ya creada</span>' : '<button type="button" class="delete-btn" data-action="delete-box">🗑</button>'}
+                                ${caja.existing ? '<span class="lock-chip">Ya creada</span>' : '<button type="button" class="delete-btn" data-action="delete-box">{{ ICONO_ELIMINAR }}</button>'}
                               </div>
                             </div>
                             <div class="field-error" data-error-key="${errorKey('box', caja.id)}" hidden></div>

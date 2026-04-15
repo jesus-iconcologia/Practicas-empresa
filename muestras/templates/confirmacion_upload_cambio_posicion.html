@@ -15,7 +15,7 @@ Confirmación subida Excel
         <h1>❌ Problemas con el cambio de posición por Excel: Fallo crítico: ERRORES DETECTADOS</h1>
 
         {% else %}
-        <h1>✅ Confirmación de cambio de posición por Excel</h1>
+        <h1>{{ ICONO_CONFIRMACION }} Confirmación de cambio de posición por Excel</h1>
 
         {% endif %}
         <p class="form-subtitle">
@@ -54,14 +54,14 @@ Confirmación subida Excel
 
     <!-- DESCARGA DE EXCEL DE ERRORES -->
     <div class="form-card">
-        <h2>📄 Excel con errores</h2>
+        <h2>{{ ICONO_DOCUMENTACION }} Excel con errores</h2>
 
         <form method="post">
             {% csrf_token %}
             <button name="excel_errores"
                     type="submit"
                     class="accion-btn accion-secundaria">
-                ⬇️ Descargar Excel con errores
+                {{ ICONO_DESCARGAR }} Descargar Excel con errores
             </button>
         </form>
         <p style="margin-bottom: 15px; margin-top: 15px;">
@@ -76,7 +76,7 @@ Confirmación subida Excel
 
     <!-- IMPORTAR OTRO EXCEL -->
     <div class="form-card">
-        <h2>📤 Importar otro archivo Excel</h2>
+        <h2>{{ ICONO_UPLOAD }} Importar otro archivo Excel</h2>
 
         <form method="post" enctype="multipart/form-data" class="styled-form">
             {% csrf_token %}
@@ -128,7 +128,7 @@ Confirmación subida Excel
     <!-- VOLVER -->
     <div class="form-actions">
         <a href="/muestras" class="accion-btn accion-secundaria">
-            ↩ Volver a muestras
+            {{ ICONO_VOLVER }} Volver a muestras
         </a>
     </div>
 

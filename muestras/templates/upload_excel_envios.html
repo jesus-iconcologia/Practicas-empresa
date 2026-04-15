@@ -9,7 +9,7 @@ Importar archivo Excel
 <link rel ="stylesheet" href="{% static 'css/forms.css' %}">
     <!-- CABECERA -->
     <div class="form-header">
-        <h1>📤 Importar archivo Excel de envío</h1>
+        <h1>{{ ICONO_UPLOAD }} Importar archivo Excel de envío</h1>
         <p class="form-subtitle">
             Registre envíos de muestras utilizando una plantilla Excel.
         </p>
@@ -38,7 +38,7 @@ Importar archivo Excel
 
     <!-- DESCARGA DE PLANTILLA -->
     <div class="form-card">
-        <h2>⬇️ Descargar plantilla</h2>
+        <h2>{{ ICONO_DESCARGAR }} Descargar plantilla</h2>
 
         <form method="post">
             {% csrf_token %}
@@ -55,7 +55,7 @@ Importar archivo Excel
         {% csrf_token %}
 
         <div class="form-card">
-            <h2>📤 Importar archivo Excel</h2>
+            <h2>{{ ICONO_UPLOAD }} Importar archivo Excel</h2>
 
             {% for field in form %}
                 <div class="form-field">
@@ -92,7 +92,7 @@ Importar archivo Excel
             </button>
 
             <a href="/muestras" class="accion-btn accion-secundaria">
-                ↩ Volver a muestras
+                {{ ICONO_VOLVER }} Volver a muestras
             </a>
         </div>
     </form>

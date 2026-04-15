@@ -1,0 +1,18 @@
+UI_SYMBOLS = {
+    "ICONO_NUEVO": "➕",
+    "ICONO_DESPLEGABLE": "▼",
+    "ICONO_VOLVER": "↩",
+    "ICONO_CHECKBOX_VACIO": "☐",
+    "ICONO_CHECKBOX_MARCADO": "☑️",
+    "ICONO_EDITAR": "✏️",
+    "ICONO_CERRAR": "✖",
+    "ICONO_OK": "✔️",
+    "ICONO_CONFIRMACION": "✅",
+    "ICONO_CONFIGURACION": "⚙️",
+    "ICONO_DESCARGAR": "⬇️",
+    "ICONO_DOCUMENTACION": "📄",
+    "ICONO_EXPORTAR": "📊",
+    "ICONO_UPLOAD": "📤",
+    "ICONO_ELIMINAR": "🗑️",
+    "ICONO_TUBO": "🧪",
+}

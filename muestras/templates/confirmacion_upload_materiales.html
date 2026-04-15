@@ -15,7 +15,7 @@ Confirmación subida excel materiales
         {% elif tiene_columnas_extras %}
         <h1>⚠️ Confirmación de subida de Excel de materiales</h1>
         {% else %}
-        <h1>✅ Confirmación de subida de Excel de materiales</h1>
+        <h1>{{ ICONO_CONFIRMACION }} Confirmación de subida de Excel de materiales</h1>
         {% endif %}
     </div>
 
@@ -48,11 +48,11 @@ Confirmación subida excel materiales
     </div>
 
     <div class="form-card">
-        <h2>📄 Excel con errores</h2>
+        <h2>{{ ICONO_DOCUMENTACION }} Excel con errores</h2>
         <form method="post">
             {% csrf_token %}
             <button name="excel_errores" type="submit" class="accion-btn accion-secundaria">
-                ⬇️ Descargar Excel con errores
+                {{ ICONO_DESCARGAR }} Descargar Excel con errores
             </button>
         </form>
         <p style="margin-bottom: 15px;">
@@ -65,7 +65,7 @@ Confirmación subida excel materiales
     {% endif %}
 
     <div class="form-card">
-        <h2>📤 Importar otro archivo Excel</h2>
+        <h2>{{ ICONO_UPLOAD }} Importar otro archivo Excel</h2>
         <form method="post" enctype="multipart/form-data" class="styled-form">
             {% csrf_token %}
             <div class="form-field">
@@ -101,7 +101,7 @@ Confirmación subida excel materiales
 
     <div class="form-actions">
         <a href="{% url 'materiales_todos' %}" class="accion-btn accion-secundaria">
-            ↩ Volver a materiales
+            {{ ICONO_VOLVER }} Volver a materiales
         </a>
     </div>
 </div>

@@ -12,6 +12,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --icono-desplegable: {{ ICONO_DESPLEGABLE_CSS|safe }};
+    }
+  </style>
 </head>
 <body>
   <header class="topbar">
@@ -69,6 +74,25 @@
   </div>
 
   <script>
+    window.APP_ICONS = {
+      nuevo: "{{ ICONO_NUEVO|escapejs }}",
+      desplegable: "{{ ICONO_DESPLEGABLE|escapejs }}",
+      volver: "{{ ICONO_VOLVER|escapejs }}",
+      checkboxVacio: "{{ ICONO_CHECKBOX_VACIO|escapejs }}",
+      checkboxMarcado: "{{ ICONO_CHECKBOX_MARCADO|escapejs }}",
+      editar: "{{ ICONO_EDITAR|escapejs }}",
+      cerrar: "{{ ICONO_CERRAR|escapejs }}",
+      ok: "{{ ICONO_OK|escapejs }}",
+      confirmacion: "{{ ICONO_CONFIRMACION|escapejs }}",
+      configuracion: "{{ ICONO_CONFIGURACION|escapejs }}",
+      descargar: "{{ ICONO_DESCARGAR|escapejs }}",
+      documentacion: "{{ ICONO_DOCUMENTACION|escapejs }}",
+      exportar: "{{ ICONO_EXPORTAR|escapejs }}",
+      upload: "{{ ICONO_UPLOAD|escapejs }}",
+      eliminar: "{{ ICONO_ELIMINAR|escapejs }}",
+      tubo: "{{ ICONO_TUBO|escapejs }}"
+    };
+
     (function () {
       const modal = document.getElementById('app-confirm-modal');
       const titleEl = document.getElementById('app-confirm-title');

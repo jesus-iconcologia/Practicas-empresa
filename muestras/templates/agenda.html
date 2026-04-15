@@ -20,7 +20,7 @@ Agenda
         </a>
 
         <a href="/muestras/nuevo_centro" class="accion-btn accion-primaria">
-            ➕ Añadir centro de envío
+            {{ ICONO_NUEVO }} Añadir centro de envío
         </a>
     </div>
 
@@ -43,7 +43,7 @@ Agenda
                     id="btn-eliminar-centros"
                     name="eliminar"
                     disabled>
-                🗑 Eliminar centros seleccionados
+                {{ ICONO_ELIMINAR }} Eliminar centros seleccionados
             </button>
         </div>
 
@@ -71,10 +71,10 @@ Agenda
                                    onchange="actualizarBotonEliminar()">
                             <a href="agenda/editar/{{ contacto.id }}"
                                class="chip-detalle" title="Editar"
-                               style="padding: 2px 5px;">✏️</a>
+                               style="padding: 2px 5px;">{{ ICONO_EDITAR }}</a>
                             <a href="agenda/{{ contacto.id }}/envio"
                                class="chip-detalle" title="Enviar"
-                               style="padding: 2px 5px;">📤</a>
+                               style="padding: 2px 5px;">{{ ICONO_UPLOAD }}</a>
                         </td>
 
                         <td>{{ contacto.centro }}</td>

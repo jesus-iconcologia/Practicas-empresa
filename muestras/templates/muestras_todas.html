@@ -1,4 +1,4 @@
-﻿{% extends "master.html" %}
+{% extends "master.html" %}
 
 {% block title %}
 Lista de Muestras
@@ -219,7 +219,7 @@ Lista de Muestras
                 <label>Material</label>
                 <div class="multiselect-wrapper" data-name="id_material">
                   <input type="hidden" name="id_material" value="">
-                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">▼</span></div>
+                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">{{ ICONO_DESPLEGABLE }}</span></div>
                   <div class="multiselect-dropdown">
                     <label><input type="checkbox" value="null"> Sin asignar</label>
                     {% for material in opciones_materiales %}
@@ -232,7 +232,7 @@ Lista de Muestras
                 <label>Estudio</label>
                 <div class="multiselect-wrapper" data-name="estudio">
                   <input type="hidden" name="estudio" value="">
-                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">▼</span></div>
+                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">{{ ICONO_DESPLEGABLE }}</span></div>
                   <div class="multiselect-dropdown">
                     <label><input type="checkbox" value="null"> Sin estudio asignado</label>
                     {% for estudio in opciones_estudios %}
@@ -289,7 +289,7 @@ Lista de Muestras
                 <label>Centro procedencia</label>
                 <div class="multiselect-wrapper" data-name="centro_procedencia">
                   <input type="hidden" name="centro_procedencia" value="">
-                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">▼</span></div>
+                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">{{ ICONO_DESPLEGABLE }}</span></div>
                   <div class="multiselect-dropdown">
                     <label><input type="checkbox" value="null"> Sin asignar</label>
                     {% for centro in opciones_centros %}
@@ -302,7 +302,7 @@ Lista de Muestras
                 <label>Estado actual</label>
                 <div class="multiselect-wrapper" data-name="estado_actual">
                   <input type="hidden" name="estado_actual" value="">
-                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">▼</span></div>
+                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">{{ ICONO_DESPLEGABLE }}</span></div>
                   <div class="multiselect-dropdown">
                     <label><input type="checkbox" value="null"> Sin asignar</label>
                     <label><input type="checkbox" value="DISP"> Disponible</label>
@@ -320,7 +320,7 @@ Lista de Muestras
                 <label>Congelador</label>
                 <div class="multiselect-wrapper" data-name="congelador">
                   <input type="hidden" name="congelador" value="">
-                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">▼</span></div>
+                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">{{ ICONO_DESPLEGABLE }}</span></div>
                   <div class="multiselect-dropdown">
                     <label><input type="checkbox" value="null"> Sin asignar</label>
                     {% for congelador in opciones_congeladores %}
@@ -333,7 +333,7 @@ Lista de Muestras
                 <label>Estante</label>
                 <div class="multiselect-wrapper" data-name="estante">
                   <input type="hidden" name="estante" value="">
-                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">▼</span></div>
+                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">{{ ICONO_DESPLEGABLE }}</span></div>
                   <div class="multiselect-dropdown">
                     <label><input type="checkbox" value="null"> Sin asignar</label>
                     {% for estante in opciones_estantes %}
@@ -346,7 +346,7 @@ Lista de Muestras
                 <label>Cajón</label>
                 <div class="multiselect-wrapper" data-name="cajon">
                   <input type="hidden" name="cajon" value="">
-                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">▼</span></div>
+                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">{{ ICONO_DESPLEGABLE }}</span></div>
                   <div class="multiselect-dropdown">
                     <label><input type="checkbox" value="null"> Sin asignar</label>
                     {% for cajon in opciones_cajones %}
@@ -359,7 +359,7 @@ Lista de Muestras
                 <label>Rack</label>
                 <div class="multiselect-wrapper" data-name="rack">
                   <input type="hidden" name="rack" value="">
-                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">▼</span></div>
+                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">{{ ICONO_DESPLEGABLE }}</span></div>
                   <div class="multiselect-dropdown">
                     <label><input type="checkbox" value="null"> Sin asignar</label>
                     {% for rack in opciones_racks %}
@@ -372,7 +372,7 @@ Lista de Muestras
                 <label>Caja</label>
                 <div class="multiselect-wrapper" data-name="caja">
                   <input type="hidden" name="caja" value="">
-                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">▼</span></div>
+                  <div class="multiselect-toggle"><span class="multiselect-tags"><span class="multiselect-placeholder">Seleccionar...</span></span><span class="arrow">{{ ICONO_DESPLEGABLE }}</span></div>
                   <div class="multiselect-dropdown">
                     <label><input type="checkbox" value="null"> Sin asignar</label>
                     {% for caja in opciones_cajas %}
@@ -397,7 +397,7 @@ Lista de Muestras
                 🔎 Filtrar
             </button>
             <a href="/muestras" class="btn btn-secondary">
-                ✖ Eliminar filtros
+                {{ ICONO_CERRAR }} Eliminar filtros
             </a>
         </div>
     </form>
@@ -407,16 +407,16 @@ Lista de Muestras
 
 
 <div class="collapsible" style="border-radius: 8px; overflow: hidden; margin-top: 15px;">
-    <button class="collapsible-header">⚙️ Acciones</button>
+    <button class="collapsible-header">{{ ICONO_CONFIGURACION }} Acciones</button>
     <div class="collapsible-content">
  <div class="action-buttons" style="border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
    <div class="action-row">
    {% if perms.muestras.can_add_muestras_web %}
     <a href="/muestras/nueva" class="btn">
-      ➕🧪 Añadir muestras
+      {{ ICONO_NUEVO }}{{ ICONO_TUBO }} Añadir muestras
     </a>
       <a href="/muestras/upload_excel" class="btn">
-        📤📄 Importar muestras
+        {{ ICONO_UPLOAD }}{{ ICONO_DOCUMENTACION }} Importar muestras
       </a>
 
     {% endif %}
@@ -442,18 +442,18 @@ Lista de Muestras
             {% endif %}
         {% endfor %}
         <button name="exportar_excel" value="exportar_excel" type="button" class="btn btn-success" onclick="exportarMuestras()">
-          📊⬇ Exportar muestras
+          {{ ICONO_EXPORTAR }}{{ ICONO_DESCARGAR }} Exportar muestras
         </button>
         <input type="hidden" name="exportar_excel" value="exportar_excel" id="exportar-hidden">
     </form>
     <button type="button" id="exportar-seleccionadas-btn" class="btn btn-success" disabled onclick="exportarSeleccionadas()">
-      📊✅ Exportar muestras seleccionadas
+      {{ ICONO_EXPORTAR }}{{ ICONO_CONFIRMACION }} Exportar muestras seleccionadas
     </button>
     </div>
 
     <div class="action-row">
       {% if perms.muestras.can_delete_muestras_web %}
-      <button type="button" onclick="validarSeleccion('eliminar', '¿Quieres eliminar las muestras seleccionadas?')" class="btn btn-danger" id='eliminar-btn' disabled>🗑️ Eliminar seleccionadas</button>
+      <button type="button" onclick="validarSeleccion('eliminar', '¿Quieres eliminar las muestras seleccionadas?')" class="btn btn-danger" id='eliminar-btn' disabled>{{ ICONO_ELIMINAR }} Eliminar seleccionadas</button>
       {%endif%}
       {% if perms.muestras.can_change_muestras_web %}
       <button type="submit" form="acciones-form" name="destruir" value="true" class="btn btn-danger" id='destruir-btn' disabled>🔥 Destruir muestra</button>
@@ -461,8 +461,8 @@ Lista de Muestras
     </div>
 
     <div class="action-row">
-    <input type="button" value="☑️ Seleccionar todo" onclick="seleccionar_todo(true)" class="btn btn-secondary">
-    <input type="button" value="☐ Deseleccionar" onclick="seleccionar_todo(false)" class="btn btn-secondary">
+    <input type="button" value="{{ ICONO_CHECKBOX_MARCADO }} Seleccionar todo" onclick="seleccionar_todo(true)" class="btn btn-secondary">
+    <input type="button" value="{{ ICONO_CHECKBOX_VACIO }} Deseleccionar" onclick="seleccionar_todo(false)" class="btn btn-secondary">
     </div>
 
     <!-- Banner para selección global -->
@@ -507,7 +507,7 @@ Lista de Muestras
       <input type="text" id="busqueda-input" value="{{ busqueda|default:'' }}" placeholder="Escribe para buscar en todas las muestras..." style="padding: 8px 12px; border: 1px solid #dfe3e6; border-radius: 6px; font-size: 14px; width: 300px;">
       <button type="button" onclick="ejecutarBusqueda()" class="btn btn-secondary" style="padding: 8px 14px;">🔍 Buscar</button>
       {% if busqueda %}
-        <button type="button" onclick="limpiarBusqueda()" class="btn btn-secondary" style="padding: 8px 14px;">✖ Limpiar búsqueda</button>
+        <button type="button" onclick="limpiarBusqueda()" class="btn btn-secondary" style="padding: 8px 14px;">{{ ICONO_CERRAR }} Limpiar búsqueda</button>
       {% endif %}
   </div>
 
@@ -536,7 +536,7 @@ Lista de Muestras
       <td>
         <input type="checkbox" name="muestra_id" value ="{{x.id}}" class="form-control" onchange="actualizarEstadoBotones()">
         <a href="{% url 'detalles_muestra' x.nom_lab %}" class="chip-detalle" title="Documentacion" style="padding: 2px 5px; margin-left: 5px;">ℹ️</a>
-        <a href="/muestras/detalles_muestra/{{x.nom_lab}}/editar" class="chip-detalle" title="Editar" style="padding: 2px 5px; margin-left: 2px;">✏️</a>
+        <a href="/muestras/detalles_muestra/{{x.nom_lab}}/editar" class="chip-detalle" title="Editar" style="padding: 2px 5px; margin-left: 2px;">{{ ICONO_EDITAR }}</a>
       </td>
       <td class="wrap-text">{{ x.id_individuo|default_if_none:"" }}</td>
       <td>{{ x.nom_lab }}</td>

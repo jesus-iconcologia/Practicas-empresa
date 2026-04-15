@@ -231,7 +231,7 @@
 
 /* ICONO GIRATORIO */
 .collapsible-header::after {
-    content: "▼";
+    content: var(--icono-desplegable);
     transition: transform 0.3s;
 }
 

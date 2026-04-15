@@ -18,7 +18,7 @@ Confirmación subida
         <h1>⚠️ Confirmación de subida de Excel de muestras: Advertencia</h1>
 
         {% else %}
-        <h1>✅ Confirmación de subida de Excel</h1>
+        <h1>{{ ICONO_CONFIRMACION }} Confirmación de subida de Excel</h1>
 
         {% endif %}
         <p class="form-subtitle">
@@ -65,12 +65,12 @@ Confirmación subida
 
     <!-- DESCARGA EXCEL ERRORES -->
     <div class="form-card">
-        <h2>📄 Excel de errores</h2>
+        <h2>{{ ICONO_DOCUMENTACION }} Excel de errores</h2>
 
         <form method="post">
             {% csrf_token %}
             <button name="excel_errores" type="submit" class="accion-btn accion-secundaria">
-                ⬇️ Descargar Excel con errores
+                {{ ICONO_DESCARGAR }} Descargar Excel con errores
             </button>
         </form>
         <p style="margin-bottom: 15px;">
@@ -86,7 +86,7 @@ Confirmación subida
 
     <!-- IMPORTAR OTRO EXCEL -->
     <div class="form-card">
-        <h2>📤 Importar otro archivo Excel</h2>
+        <h2>{{ ICONO_UPLOAD }} Importar otro archivo Excel</h2>
 
         <form method="post" enctype="multipart/form-data" class="styled-form">
             {% csrf_token %}
@@ -115,7 +115,7 @@ Confirmación subida
             {% csrf_token %}
 
             <button type="submit" name="confirmar" class="accion-btn accion-primaria">
-                ✅ Confirmar subida
+                {{ ICONO_CONFIRMACION }} Confirmar subida
             </button>
 
             <button type="submit" name="cancelar" class="accion-btn accion-peligro">
@@ -128,7 +128,7 @@ Confirmación subida
     <!-- VOLVER -->
     <div class="form-actions">
         <a href="/muestras" class="accion-btn accion-secundaria">
-            ↩ Volver a muestras
+            {{ ICONO_VOLVER }} Volver a muestras
         </a>
     </div>
 </div>

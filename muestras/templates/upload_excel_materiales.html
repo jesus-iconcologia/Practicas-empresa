@@ -11,7 +11,7 @@ Importar materiales por Excel
 <div class="form-container">
 
     <div class="form-header">
-        <h1>📤 Importar materiales por Excel</h1>
+        <h1>{{ ICONO_UPLOAD }} Importar materiales por Excel</h1>
         <p class="form-subtitle">
             Cree o actualice materiales mediante una plantilla Excel.
         </p>
@@ -45,7 +45,7 @@ Importar materiales por Excel
     </div>
 
     <div class="form-card">
-        <h2>⬇️ Descargar plantilla</h2>
+        <h2>{{ ICONO_DESCARGAR }} Descargar plantilla</h2>
         <a href="{% url 'descargar_plantilla_materiales' %}"
            download="plantilla_materiales.xlsx"
            class="accion-btn accion-secundaria">
@@ -57,7 +57,7 @@ Importar materiales por Excel
         {% csrf_token %}
 
         <div class="form-card">
-            <h2>📄 Archivo Excel</h2>
+            <h2>{{ ICONO_DOCUMENTACION }} Archivo Excel</h2>
 
             {% for field in form %}
                 <div class="form-field">
@@ -94,7 +94,7 @@ Importar materiales por Excel
             </button>
 
             <a href="{% url 'materiales_todos' %}" class="accion-btn accion-secundaria">
-                ↩ Volver a materiales
+                {{ ICONO_VOLVER }} Volver a materiales
             </a>
         </div>
     </form>

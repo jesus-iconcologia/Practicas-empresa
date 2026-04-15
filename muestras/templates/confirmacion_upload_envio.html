@@ -11,7 +11,7 @@ Confirmación subida excel envios
 
     <!-- CABECERA -->
     <div class="form-header">
-        <h1>✅ Confirmación de subida de Excel de envíos</h1>
+        <h1>{{ ICONO_CONFIRMACION }} Confirmación de subida de Excel de envíos</h1>
         <p class="form-subtitle">
             Revise los resultados de validación antes de confirmar el envío de muestras.
         </p>
@@ -52,14 +52,14 @@ Confirmación subida excel envios
 
     <!-- DESCARGA DE EXCEL DE ERRORES -->
     <div class="form-card">
-        <h2>📄 Excel con errores</h2>
+        <h2>{{ ICONO_DOCUMENTACION }} Excel con errores</h2>
 
         <form method="post">
             {% csrf_token %}
             <button name="excel_errores"
                     type="submit"
                     class="accion-btn accion-secundaria">
-                ⬇️ Descargar Excel con errores
+                {{ ICONO_DESCARGAR }} Descargar Excel con errores
             </button>
         </form>
     </div>
@@ -75,7 +75,7 @@ Confirmación subida excel envios
             <button type="submit"
                     name="confirmar"
                     class="accion-btn accion-primaria">
-                📤 Confirmar envío
+                {{ ICONO_UPLOAD }} Confirmar envío
             </button>
 
             <button type="submit"
@@ -89,7 +89,7 @@ Confirmación subida excel envios
     <!-- VOLVER -->
     <div class="form-actions">
         <a href="/muestras" class="accion-btn accion-secundaria">
-            ↩ Volver a muestras
+            {{ ICONO_VOLVER }} Volver a muestras
         </a>
     </div>
 

@@ -17,7 +17,7 @@ Envio de Muestras
 
         <a href="{% url 'upload_excel_envios' centro.id %}"
            class="accion-btn accion-secundaria">
-            📄 Registrar envío por Excel
+            {{ ICONO_DOCUMENTACION }} Registrar envío por Excel
         </a>
     </div>
 
@@ -102,7 +102,7 @@ Envio de Muestras
         <!-- ACCIONES -->
         <div class="form-actions">
             <button type="submit" class="accion-btn accion-primaria">
-                📤 Registrar envío
+                {{ ICONO_UPLOAD }} Registrar envío
             </button>
         </div>
     </form>

@@ -128,7 +128,7 @@ Materiales
 
         <div class="filter-buttons">
           <button type="submit" class="btn btn-primary">🔎 Filtrar</button>
-          <a href="{% url 'materiales_todos' %}" class="btn btn-secondary">✖ Eliminar filtros</a>
+          <a href="{% url 'materiales_todos' %}" class="btn btn-secondary">{{ ICONO_CERRAR }} Eliminar filtros</a>
         </div>
       </form>
     </div>
@@ -136,12 +136,12 @@ Materiales
 </div>
 
 <div class="collapsible" style="border-radius: 8px; overflow: hidden; margin-top: 15px;">
-  <button class="collapsible-header">⚙️ Acciones</button>
+  <button class="collapsible-header">{{ ICONO_CONFIGURACION }} Acciones</button>
   <div class="collapsible-content">
     <div class="action-buttons" style="border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
       <div class="action-row">
-        <a href="{% url 'nuevo_material' %}" class="btn">➕ Nuevo material</a>
-        <a href="{% url 'upload_excel_materiales' %}" class="btn">📤📄 Importar materiales</a>
+        <a href="{% url 'nuevo_material' %}" class="btn">{{ ICONO_NUEVO }} Nuevo material</a>
+        <a href="{% url 'upload_excel_materiales' %}" class="btn">{{ ICONO_UPLOAD }}{{ ICONO_DOCUMENTACION }} Importar materiales</a>
       </div>
 
       <div class="action-row">
@@ -150,7 +150,7 @@ Materiales
                 class="btn btn-success"
                 disabled
                 onclick="enviarAccionMateriales('exportar_seleccionados')">
-          📊✅ Exportar materiales seleccionados
+          {{ ICONO_EXPORTAR }}{{ ICONO_CONFIRMACION }} Exportar materiales seleccionados
         </button>
       </div>
 
@@ -160,13 +160,13 @@ Materiales
                 class="btn btn-danger"
                 disabled
                 onclick="validarSeleccionMateriales('eliminar', '¿Quieres eliminar los materiales seleccionados?')">
-          🗑️ Eliminar seleccionados
+          {{ ICONO_ELIMINAR }} Eliminar seleccionados
         </button>
       </div>
 
       <div class="action-row">
-        <input type="button" value="☑️ Seleccionar todo" onclick="seleccionarTodoMateriales(true)" class="btn btn-secondary">
-        <input type="button" value="☐ Deseleccionar" onclick="seleccionarTodoMateriales(false)" class="btn btn-secondary">
+        <input type="button" value="{{ ICONO_CHECKBOX_MARCADO }} Seleccionar todo" onclick="seleccionarTodoMateriales(true)" class="btn btn-secondary">
+        <input type="button" value="{{ ICONO_CHECKBOX_VACIO }} Deseleccionar" onclick="seleccionarTodoMateriales(false)" class="btn btn-secondary">
       </div>
     </div>
   </div>
@@ -209,14 +209,14 @@ Materiales
           <tr>
             <td>
               <input type="checkbox" name="material_id" value="{{ material.id }}" class="form-control" onchange="actualizarEstadoBotonesMateriales()">
-              <a href="{% url 'editar_material' material.id %}" class="chip-detalle" title="Editar" style="padding: 2px 5px; margin-left: 5px;">✏️</a>
+              <a href="{% url 'editar_material' material.id %}" class="chip-detalle" title="Editar" style="padding: 2px 5px; margin-left: 5px;">{{ ICONO_EDITAR }}</a>
             </td>
             <td><strong>{{ material.nombre }}</strong></td>
-            <td style="text-align:center;">{% if material.usa_volumen %}✔️{% else %}✖️{% endif %}</td>
+            <td style="text-align:center;">{% if material.usa_volumen %}{{ ICONO_OK }}{% else %}{{ ICONO_CERRAR }}{% endif %}</td>
             <td style="text-align:center;">{{ material.unidades_volumen|default_if_none:"" }}</td>
-            <td style="text-align:center;">{% if material.usa_concentracion %}✔️{% else %}✖️{% endif %}</td>
+            <td style="text-align:center;">{% if material.usa_concentracion %}{{ ICONO_OK }}{% else %}{{ ICONO_CERRAR }}{% endif %}</td>
             <td style="text-align:center;">{{ material.unidades_concentracion|default_if_none:"" }}</td>
-            <td style="text-align:center;">{% if material.usa_unidades_bloque %}✔️{% else %}✖️{% endif %}</td>
+            <td style="text-align:center;">{% if material.usa_unidades_bloque %}{{ ICONO_OK }}{% else %}{{ ICONO_CERRAR }}{% endif %}</td>
             <td style="text-align:center;">{{ material.unidades_recuento|default_if_none:"" }}</td>
           </tr>
         {% empty %}

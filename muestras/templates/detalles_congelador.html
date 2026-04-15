@@ -220,10 +220,10 @@ Detalles del recurso
     <div class="acciones-estudios">
         <a href="/archivo" class="accion-btn accion-secundaria">Volver al archivo</a>
         {% if perms.muestras.can_change_localizaciones_web %}
-        <a href="{{ congelador.congelador }}/editar" class="accion-btn accion-primaria">✏️ Editar detalles del recurso</a>
+        <a href="{{ congelador.congelador }}/editar" class="accion-btn accion-primaria">{{ ICONO_EDITAR }} Editar detalles del recurso</a>
         {% endif %}
         {% if perms.muestras.can_add_localizaciones_web %}
-        <a href="{% url 'opciones_creacion_localizaciones' congelador.congelador %}" class="accion-btn accion-primaria">➕ Crear posiciones</a>
+        <a href="{% url 'opciones_creacion_localizaciones' congelador.congelador %}" class="accion-btn accion-primaria">{{ ICONO_NUEVO }} Crear posiciones</a>
         {% endif %}
         {% if perms.muestras.can_change_localizaciones_web %}
         <a href="{% url 'anadir_reparacion_recurso' congelador.congelador %}" class="accion-btn accion-primaria">🔧 Añadir reparación</a>
@@ -293,10 +293,10 @@ Detalles del recurso
                             <span class="repair-date">{{ reparacion.fecha_reparacion }}</span>
                             {% if perms.muestras.can_change_localizaciones_web %}
                             <div class="repair-actions">
-                                <a href="{% url 'editar_reparacion_recurso' reparacion.id %}" class="repair-icon-btn chip-detalle" title="Editar reparación" aria-label="Editar reparación">✏️</a>
+                                <a href="{% url 'editar_reparacion_recurso' reparacion.id %}" class="repair-icon-btn chip-detalle" title="Editar reparación" aria-label="Editar reparación">{{ ICONO_EDITAR }}</a>
                                 <form method="post" action="{% url 'eliminar_reparacion_recurso' reparacion.id %}" style="margin:0;" onsubmit="return confirmarEliminacionReparacion(event, this);">
                                     {% csrf_token %}
-                                    <button type="submit" class="repair-icon-btn repair-icon-btn-danger" title="Eliminar reparación" aria-label="Eliminar reparación">🗑️</button>
+                                    <button type="submit" class="repair-icon-btn repair-icon-btn-danger" title="Eliminar reparación" aria-label="Eliminar reparación">{{ ICONO_ELIMINAR }}</button>
                                 </form>
                             </div>
                             {% endif %}
